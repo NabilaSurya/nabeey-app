@@ -1,7 +1,3 @@
-import BiodataApp from "./BiodataApp";
-
-function App() {
-  return <BiodataApp />;
+export default function App() {
+  return null
 }
-
-export default App;
