@@ -1,5 +1,6 @@
 import { lazy, Suspense } from "react";
-import { createBrowserRouter } from "react-router-dom";
+import { createBrowserRouter, Navigate } from "react-router-dom";
+import LoadingSpinner from "../components/LoadingSpinner";
 
 // Layouts
 import MainLayout from "../layouts/MainLayout";
@@ -11,20 +12,14 @@ const Rooms = lazy(() => import("../pages/Rooms"));
 const About = lazy(() => import("../pages/About"));
 const Login = lazy(() => import("../pages/Login"));
 const Register = lazy(() => import("../pages/Register"));
+const Customers = lazy(() => import("../pages/Customers"));
+const Settings = lazy(() => import("../pages/Settings"));
 
 // Tambahan untuk Error & NotFound
 const NotFound = lazy(() => import("../pages/NotFound"));
 const ErrorPage = lazy(() => import("../pages/ErrorPage"));
 
-// Komponen Loading yang lebih "LuxStay"
-const Loading = () => {
-  return (
-    <div className="h-screen flex flex-col justify-center items-center bg-[#FDFCFB]">
-      <div className="w-10 h-10 border-4 border-stone-200 border-t-stone-900 rounded-full animate-spin"></div>
-      <p className="mt-4 text-xs uppercase tracking-[4px] text-stone-400 font-bold">LuxStay</p>
-    </div>
-  );
-};
+const Loading = () => <LoadingSpinner />;
 
 const router = createBrowserRouter([
   {
@@ -34,7 +29,6 @@ const router = createBrowserRouter([
         <MainLayout />
       </Suspense>
     ),
-    // 1. Menangani Error System (misal: API putus atau crash)
     errorElement: (
       <Suspense fallback={<Loading />}>
         <ErrorPage />
@@ -53,14 +47,22 @@ const router = createBrowserRouter([
         path: "about",
         element: <About />,
       },
-      // 2. Menangani Halaman Tidak Ditemukan (404) di dalam MainLayout
+      {
+        path: "customers",
+        element: <Customers />,
+      },
+      {
+        path: "settings",
+        element: <Settings />,
+      },
+      // INI ADALAH NOT FOUND (404)
+      // Jika user ngetik asal di dalam domain utama, halaman ini muncul
       {
         path: "*",
         element: <NotFound />,
       },
     ],
   },
-
   {
     path: "/auth",
     element: (

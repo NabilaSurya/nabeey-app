@@ -1,25 +1,23 @@
 import { useState, useEffect } from "react";
-import RoomCard from "../components/RoomCard";
+import { FiPlus, FiSearch, FiEdit3, FiTrash2, FiEye, FiCheckCircle, FiXCircle } from "react-icons/fi";
+
+const roomsData = [
+  { id: 1, title: "Oceanic Deluxe", price: 120, category: "Suite", status: "Available", stock: 5, image: "https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?q=80&w=2070" },
+  { id: 2, title: "Modern Heritage Suite", price: 250, category: "Suite", status: "Booked", stock: 0, image: "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?q=80&w=2070" },
+  { id: 3, title: "Royal Penthouse", price: 400, category: "Penthouse", status: "Available", stock: 2, image: "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?q=80&w=2080" },
+  { id: 4, title: "Garden Escape Villa", price: 300, category: "Villa", status: "Maintenance", stock: 1, image: "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?q=80&w=2070" },
+  { id: 5, title: "Presidential Luxury Suite", price: 550, category: "Suite", status: "Available", stock: 1, image: "https://images.unsplash.com/photo-1631049307264-da0ec9d70304?q=80&w=2070" },
+  { id: 6, title: "Sky Loft Penthouse", price: 280, category: "Penthouse", status: "Available", stock: 3, image: "https://images.unsplash.com/photo-1618773928121-c32242e63f39?q=80&w=2070" },
+];
 
 export default function Rooms() {
-  // 1. DATA MASTER (Anggap hasil fetch API)
-  const allRooms = [
-    { title: "Oceanic Deluxe", price: 120, category: "Suite", image: "https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?q=80&w=2070" },
-    { title: "Modern Heritage Suite with City View", price: 250, category: "Suite", image: "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?q=80&w=2070" },
-    { title: "Royal Penthouse", price: 400, category: "Penthouse", image: "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?q=80&w=2080" },
-    { title: "Garden Escape Villa", price: 300, category: "Villa", image: "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?q=80&w=2070" },
-    { title: "Presidential Luxury Suite", price: 550, category: "Suite", image: "https://images.unsplash.com/photo-1631049307264-da0ec9d70304?q=80&w=2070" },
-    { title: "Sky Loft Penthouse", price: 280, category: "Penthouse", image: "https://images.unsplash.com/photo-1618773928121-c32242e63f39?q=80&w=2070" },
-  ];
-
-  // 2. STATE UNTUK FILTER & SEARCH
-  const [filteredRooms, setFilteredRooms] = useState(allRooms);
+  const [filteredRooms, setFilteredRooms] = useState(roomsData);
   const [searchQuery, setSearchQuery] = useState("");
   const [activeCategory, setActiveCategory] = useState("All");
 
-  // 3. LOGIKA FILTER & SEARCH (LIVE)
+  // Logika Filter & Search Otomatis
   useEffect(() => {
-    const filtered = allRooms.filter((room) => {
+    const filtered = roomsData.filter((room) => {
       const matchSearch = room.title.toLowerCase().includes(searchQuery.toLowerCase());
       const matchCategory = activeCategory === "All" || room.category === activeCategory;
       return matchSearch && matchCategory;
@@ -28,109 +26,125 @@ export default function Rooms() {
   }, [searchQuery, activeCategory]);
 
   return (
-    <div className="w-full bg-[#FDFCFB] min-h-screen">
+    <div className="w-full animate-in fade-in duration-700">
       {/* Header Section */}
-      <section className="pt-44 pb-20 px-6 md:px-16 max-w-[1440px] mx-auto">
-        <div className="flex flex-col md:flex-row justify-between items-end gap-8 border-b border-stone-200 pb-12">
-          <div className="max-w-2xl w-full">
-            <p className="uppercase tracking-[6px] text-amber-800 text-[10px] font-bold mb-4">
-              Our Collection
-            </p>
-            <h1 className="text-6xl md:text-8xl font-bold italic tracking-tighter leading-none text-stone-900 mb-8">
-              Rooms & <br /> Suites
-            </h1>
-            
-            {/* SEARCH BOX */}
-            <div className="max-w-md relative">
-              <input 
-                type="text"
-                placeholder="Search by room name..."
-                className="w-full bg-transparent border-b border-stone-300 py-3 text-sm focus:border-stone-900 outline-none transition-all placeholder:italic"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
-              <span className="absolute right-0 top-3 text-stone-400">🔍</span>
-            </div>
-          </div>
-
-          <div className="md:text-right w-full md:w-auto">
-            <p className="text-stone-500 max-w-xs text-sm leading-relaxed mb-6 italic ml-auto">
-              "Pick your sanctuary. From minimalist suites to extravagant royal penthouses."
-            </p>
-            
-            {/* CATEGORY FILTER */}
-            <div className="flex gap-3 overflow-x-auto pb-2 no-scrollbar justify-start md:justify-end">
-              {["All", "Suite", "Villa", "Penthouse"].map((cat) => (
-                <button 
-                  key={cat} 
-                  onClick={() => setActiveCategory(cat)}
-                  className={`px-5 py-2 rounded-full border text-[10px] uppercase tracking-widest font-bold transition-all whitespace-nowrap ${
-                    activeCategory === cat 
-                    ? "bg-stone-900 text-white border-stone-900" 
-                    : "border-stone-200 text-stone-500 hover:border-stone-900 hover:text-stone-900"
-                  }`}
-                >
-                  {cat}
-                </button>
-              ))}
-            </div>
-          </div>
+      <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-12">
+        <div>
+          <h1 className="text-4xl font-black tracking-tighter text-stone-900 uppercase leading-none">
+            Room Inventory<span className="text-amber-600">.</span>
+          </h1>
+          <p className="text-stone-400 text-sm font-medium mt-2 font-serif italic">
+            Manage your property listings, pricing, and availability.
+          </p>
         </div>
-      </section>
+        
+        <button className="flex items-center gap-3 bg-stone-900 text-white px-8 py-4 rounded-2xl font-bold text-[10px] uppercase tracking-[2px] hover:bg-amber-900 transition-all shadow-xl shadow-stone-200 active:scale-95">
+          <FiPlus size={16} />
+          <span>Add New Room</span>
+        </button>
+      </header>
+
+      {/* Toolbar: Search & Category Filter */}
+      <div className="flex flex-col lg:flex-row justify-between items-center gap-6 mb-10">
+        {/* Search Bar */}
+        <div className="relative w-full lg:max-w-md">
+          <FiSearch className="absolute left-5 top-1/2 -translate-y-1/2 text-stone-300" size={18} />
+          <input 
+            type="text" 
+            placeholder="Search by name or category..." 
+            className="w-full bg-white border border-stone-100 pl-14 pr-6 py-4 rounded-2xl outline-none text-sm focus:ring-2 focus:ring-stone-100 transition-all shadow-sm font-medium"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
+        </div>
+
+        {/* Category Chips */}
+        <div className="flex gap-2 overflow-x-auto no-scrollbar w-full lg:w-auto pb-2 lg:pb-0">
+          {["All", "Suite", "Villa", "Penthouse"].map((cat) => (
+            <button 
+              key={cat} 
+              onClick={() => setActiveCategory(cat)}
+              className={`px-6 py-3 rounded-xl text-[10px] uppercase tracking-widest font-black transition-all border ${
+                activeCategory === cat 
+                ? "bg-stone-900 text-white border-stone-900 shadow-lg shadow-stone-200" 
+                : "bg-white text-stone-400 border-stone-100 hover:border-stone-900 hover:text-stone-900"
+              }`}
+            >
+              {cat}
+            </button>
+          ))}
+        </div>
+      </div>
 
       {/* Grid Rooms */}
-      <section className="px-6 md:px-16 pb-32 max-w-[1440px] mx-auto">
-        {filteredRooms.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-10 gap-y-20">
-            {filteredRooms.map((room, i) => (
-              <div key={i} className="flex flex-col h-full group">
-                <div className="flex-grow">
-                  <RoomCard {...room} />
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
+        {filteredRooms.map((room) => (
+          <div key={room.id} className="group bg-white rounded-[2.5rem] border border-stone-100 overflow-hidden hover:shadow-2xl hover:shadow-stone-200/50 transition-all duration-500">
+            {/* Image Wrap */}
+            <div className="relative h-60 overflow-hidden">
+              <img src={room.image} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" alt={room.title} />
+              <div className="absolute top-5 left-5">
+                <span className={`px-4 py-1.5 rounded-full text-[9px] font-black uppercase tracking-widest backdrop-blur-md border ${
+                  room.status === "Available" ? "bg-emerald-500/10 text-emerald-500 border-emerald-500/20" : 
+                  room.status === "Booked" ? "bg-amber-500/10 text-amber-500 border-amber-500/20" : 
+                  "bg-red-500/10 text-red-500 border-red-500/20"
+                }`}>
+                  {room.status}
+                </span>
+              </div>
+            </div>
+
+            {/* Content Detail */}
+            <div className="p-8">
+              <div className="flex justify-between items-start mb-6">
+                <div>
+                  <p className="text-[10px] uppercase tracking-widest text-stone-300 font-black mb-1">{room.category}</p>
+                  <h3 className="text-xl font-bold text-stone-900 tracking-tight">{room.title}</h3>
                 </div>
-                <div className="mt-auto pt-6 border-t border-stone-100">
-                  <div className="flex gap-4 text-[10px] uppercase tracking-widest text-stone-400 font-bold px-2">
-                    <span>45 m²</span>
-                    <span className="text-stone-200">•</span>
-                    <span>City View</span>
-                    <span className="text-stone-200">•</span>
-                    <span>King Bed</span>
-                  </div>
+                <div className="text-right">
+                    <p className="text-lg font-black text-stone-900">${room.price}</p>
+                    <p className="text-[9px] text-stone-400 uppercase font-bold">per night</p>
                 </div>
               </div>
-            ))}
-          </div>
-        ) : (
-          <div className="py-20 text-center">
-            <h3 className="text-2xl italic text-stone-400 font-serif">No rooms found for "{searchQuery}"</h3>
-            <button 
-              onClick={() => {setSearchQuery(""); setActiveCategory("All");}}
-              className="mt-4 text-stone-900 underline text-xs font-bold uppercase tracking-widest"
-            >
-              Clear all filters
-            </button>
-          </div>
-        )}
-      </section>
 
-      {/* CTA Section */}
-      <section className="bg-white py-32 px-6 text-center border-t border-stone-50">
-        <div className="max-w-3xl mx-auto">
-          <h2 className="text-4xl md:text-5xl font-bold italic text-stone-900 mb-6 tracking-tight">
-            Need a custom arrangement?
-          </h2>
-          <p className="text-stone-500 mb-12 max-w-lg mx-auto text-sm md:text-base leading-relaxed">
-            Contact our concierge for personalized services, from airport <br className="hidden md:block" /> pickups to private dinner arrangements.
-          </p>
-          
-          <div className="flex justify-center">
-            <button className="bg-[#1A1A1A] text-white px-12 py-5 rounded-full font-bold uppercase text-[11px] tracking-[3px] shadow-2xl shadow-stone-400 hover:bg-black hover:scale-105 transition-all duration-300">
-              Contact Concierge
-            </button>
+              {/* Stock/Units Status */}
+              <div className="flex items-center gap-3 mb-8">
+                 <div className="flex-1 h-1.5 bg-stone-50 rounded-full overflow-hidden">
+                    <div 
+                      className={`h-full rounded-full transition-all duration-1000 ${room.stock > 0 ? "bg-stone-900" : "bg-stone-200"}`} 
+                      style={{ width: `${(room.stock / 5) * 100}%` }}
+                    ></div>
+                 </div>
+                 <span className="text-[10px] font-black text-stone-400 uppercase">{room.stock} Units</span>
+              </div>
+
+              {/* Admin Actions Bar */}
+              <div className="flex gap-2">
+                <button className="flex-1 flex items-center justify-center gap-2 py-3.5 bg-stone-50 text-stone-900 rounded-2xl hover:bg-stone-900 hover:text-white transition-all text-[10px] font-black uppercase tracking-widest border border-stone-100 shadow-sm active:scale-95">
+                  <FiEdit3 size={14} /> Edit Room
+                </button>
+                <button className="w-12 h-12 flex items-center justify-center bg-stone-50 text-stone-400 rounded-2xl hover:bg-red-50 hover:text-red-500 transition-all border border-stone-100 active:scale-95">
+                  <FiTrash2 size={16} />
+                </button>
+              </div>
+            </div>
           </div>
+        ))}
+      </div>
+
+      {/* Empty State */}
+      {filteredRooms.length === 0 && (
+        <div className="py-32 text-center bg-white rounded-[3rem] border border-dashed border-stone-200">
+          <FiXCircle className="mx-auto text-stone-200 mb-4" size={48} />
+          <h3 className="text-xl font-serif italic text-stone-400 mb-2">No rooms match your filter.</h3>
+          <button 
+            onClick={() => {setSearchQuery(""); setActiveCategory("All")}}
+            className="text-stone-900 font-bold underline text-[10px] uppercase tracking-widest"
+          >
+            Reset all filters
+          </button>
         </div>
-      </section>
-      
-      <div className="w-full h-20 bg-black"></div>
+      )}
     </div>
   );
 }
