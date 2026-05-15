@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { FiPlus, FiSearch, FiEdit3, FiTrash2, FiEye, FiCheckCircle, FiXCircle } from "react-icons/fi";
+import { FiPlus, FiSearch, FiEdit3, FiTrash2, FiMoreVertical } from "react-icons/fi";
 
 const roomsData = [
   { id: 1, title: "Oceanic Deluxe", price: 120, category: "Suite", status: "Available", stock: 5, image: "https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?q=80&w=2070" },
@@ -15,7 +15,6 @@ export default function Rooms() {
   const [searchQuery, setSearchQuery] = useState("");
   const [activeCategory, setActiveCategory] = useState("All");
 
-  // Logika Filter & Search Otomatis
   useEffect(() => {
     const filtered = roomsData.filter((room) => {
       const matchSearch = room.title.toLowerCase().includes(searchQuery.toLowerCase());
@@ -26,48 +25,48 @@ export default function Rooms() {
   }, [searchQuery, activeCategory]);
 
   return (
-    <div className="w-full animate-in fade-in duration-700">
+    <div className="w-full bg-[#F5F5F7] min-h-screen animate-in fade-in duration-700 font-['Inter',_sans-serif]">
       {/* Header Section */}
-      <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-12">
+      <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-10">
         <div>
-          <h1 className="text-4xl font-black tracking-tighter text-stone-900 uppercase leading-none">
-            Room Inventory<span className="text-amber-600">.</span>
+          <h1 className="text-[28px] md:text-[32px] font-bold text-[#151D48] tracking-tight leading-[1.2]">
+            Room Inventory
           </h1>
-          <p className="text-stone-400 text-sm font-medium mt-2 font-serif italic">
+          <p className="text-[#6B7280] text-[13px] mt-1 leading-[1.5]">
             Manage your property listings, pricing, and availability.
           </p>
         </div>
         
-        <button className="flex items-center gap-3 bg-stone-900 text-white px-8 py-4 rounded-2xl font-bold text-[10px] uppercase tracking-[2px] hover:bg-amber-900 transition-all shadow-xl shadow-stone-200 active:scale-95">
-          <FiPlus size={16} />
+        <button className="flex items-center gap-3 bg-[#5B5FEF] text-white px-7 py-3.5 rounded-2xl font-semibold text-[14px] hover:bg-[#4a4ce0] transition-all shadow-lg shadow-indigo-100 active:scale-95">
+          <FiPlus size={18} />
           <span>Add New Room</span>
         </button>
       </header>
 
-      {/* Toolbar: Search & Category Filter */}
-      <div className="flex flex-col lg:flex-row justify-between items-center gap-6 mb-10">
-        {/* Search Bar */}
-        <div className="relative w-full lg:max-w-md">
-          <FiSearch className="absolute left-5 top-1/2 -translate-y-1/2 text-stone-300" size={18} />
+      {/* Toolbar: Search & Category */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+        {/* Search Input */}
+        <div className="relative lg:col-span-1 group">
+          <FiSearch className="absolute left-5 top-1/2 -translate-y-1/2 text-[#6B7280] group-focus-within:text-[#5B5FEF]" size={18} />
           <input 
             type="text" 
-            placeholder="Search by name or category..." 
-            className="w-full bg-white border border-stone-100 pl-14 pr-6 py-4 rounded-2xl outline-none text-sm focus:ring-2 focus:ring-stone-100 transition-all shadow-sm font-medium"
+            placeholder="Search rooms..." 
+            className="w-full bg-white border-none pl-14 pr-6 py-4 rounded-[20px] outline-none text-[13px] text-[#151D48] font-medium shadow-sm focus:ring-2 focus:ring-[#5B5FEF]/20 transition-all"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
         </div>
 
-        {/* Category Chips */}
-        <div className="flex gap-2 overflow-x-auto no-scrollbar w-full lg:w-auto pb-2 lg:pb-0">
+        {/* Category Tabs */}
+        <div className="lg:col-span-2 flex gap-3 overflow-x-auto no-scrollbar pb-2">
           {["All", "Suite", "Villa", "Penthouse"].map((cat) => (
             <button 
               key={cat} 
               onClick={() => setActiveCategory(cat)}
-              className={`px-6 py-3 rounded-xl text-[10px] uppercase tracking-widest font-black transition-all border ${
+              className={`px-8 py-3.5 rounded-[18px] text-[13px] font-semibold transition-all whitespace-nowrap ${
                 activeCategory === cat 
-                ? "bg-stone-900 text-white border-stone-900 shadow-lg shadow-stone-200" 
-                : "bg-white text-stone-400 border-stone-100 hover:border-stone-900 hover:text-stone-900"
+                ? "bg-[#5B5FEF] text-white shadow-md shadow-indigo-100" 
+                : "bg-white text-[#6B7280] hover:bg-white hover:text-[#5B5FEF] shadow-sm"
               }`}
             >
               {cat}
@@ -76,75 +75,71 @@ export default function Rooms() {
         </div>
       </div>
 
-      {/* Grid Rooms */}
+      {/* Room Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
         {filteredRooms.map((room) => (
-          <div key={room.id} className="group bg-white rounded-[2.5rem] border border-stone-100 overflow-hidden hover:shadow-2xl hover:shadow-stone-200/50 transition-all duration-500">
+          <div key={room.id} className="bg-white rounded-[32px] p-4 shadow-[0_10px_30px_rgba(0,0,0,0.03)] border border-[#F5F5F7] group hover:-translate-y-2 transition-all duration-500">
             {/* Image Wrap */}
-            <div className="relative h-60 overflow-hidden">
-              <img src={room.image} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" alt={room.title} />
-              <div className="absolute top-5 left-5">
-                <span className={`px-4 py-1.5 rounded-full text-[9px] font-black uppercase tracking-widest backdrop-blur-md border ${
-                  room.status === "Available" ? "bg-emerald-500/10 text-emerald-500 border-emerald-500/20" : 
-                  room.status === "Booked" ? "bg-amber-500/10 text-amber-500 border-amber-500/20" : 
-                  "bg-red-500/10 text-red-500 border-red-500/20"
-                }`}>
-                  {room.status}
-                </span>
+            <div className="relative h-56 rounded-[24px] overflow-hidden mb-6">
+              <img src={room.image} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" alt={room.title} />
+              <div className="absolute top-4 right-4">
+                <StatusBadge status={room.status} />
               </div>
             </div>
 
-            {/* Content Detail */}
-            <div className="p-8">
-              <div className="flex justify-between items-start mb-6">
+            {/* Room Content */}
+            <div className="px-2 pb-2">
+              <div className="flex justify-between items-start mb-4">
                 <div>
-                  <p className="text-[10px] uppercase tracking-widest text-stone-300 font-black mb-1">{room.category}</p>
-                  <h3 className="text-xl font-bold text-stone-900 tracking-tight">{room.title}</h3>
+                  <span className="text-[11px] font-bold text-[#BF83FF] uppercase tracking-wider mb-1 block">
+                    {room.category}
+                  </span>
+                  <h3 className="text-[18px] font-bold text-[#151D48] leading-[1.3]">{room.title}</h3>
+                </div>
+                <button className="text-[#6B7280] hover:text-[#5B5FEF]">
+                  <FiMoreVertical size={20} />
+                </button>
+              </div>
+
+              <div className="flex items-center justify-between py-4 border-y border-[#F5F5F7] mb-6">
+                <div>
+                    <p className="text-[11px] text-[#6B7280] font-medium uppercase">Price</p>
+                    <p className="text-[20px] font-bold text-[#151D48]">${room.price}<span className="text-[12px] text-[#6B7280] font-normal">/night</span></p>
                 </div>
                 <div className="text-right">
-                    <p className="text-lg font-black text-stone-900">${room.price}</p>
-                    <p className="text-[9px] text-stone-400 uppercase font-bold">per night</p>
+                    <p className="text-[11px] text-[#6B7280] font-medium uppercase">Stock</p>
+                    <p className="text-[14px] font-bold text-[#151D48]">{room.stock} Units</p>
                 </div>
               </div>
 
-              {/* Stock/Units Status */}
-              <div className="flex items-center gap-3 mb-8">
-                 <div className="flex-1 h-1.5 bg-stone-50 rounded-full overflow-hidden">
-                    <div 
-                      className={`h-full rounded-full transition-all duration-1000 ${room.stock > 0 ? "bg-stone-900" : "bg-stone-200"}`} 
-                      style={{ width: `${(room.stock / 5) * 100}%` }}
-                    ></div>
-                 </div>
-                 <span className="text-[10px] font-black text-stone-400 uppercase">{room.stock} Units</span>
-              </div>
-
-              {/* Admin Actions Bar */}
-              <div className="flex gap-2">
-                <button className="flex-1 flex items-center justify-center gap-2 py-3.5 bg-stone-50 text-stone-900 rounded-2xl hover:bg-stone-900 hover:text-white transition-all text-[10px] font-black uppercase tracking-widest border border-stone-100 shadow-sm active:scale-95">
-                  <FiEdit3 size={14} /> Edit Room
+              {/* Actions */}
+              <div className="flex gap-3">
+                <button className="flex-1 bg-[#F3E8FF] text-[#BF83FF] py-3 rounded-2xl font-bold text-[13px] hover:bg-[#BF83FF] hover:text-white transition-all flex items-center justify-center gap-2">
+                  <FiEdit3 size={16} /> Edit
                 </button>
-                <button className="w-12 h-12 flex items-center justify-center bg-stone-50 text-stone-400 rounded-2xl hover:bg-red-50 hover:text-red-500 transition-all border border-stone-100 active:scale-95">
-                  <FiTrash2 size={16} />
+                <button className="p-3 bg-[#FFE2E5] text-[#FA5A7D] rounded-2xl hover:bg-[#FA5A7D] hover:text-white transition-all">
+                  <FiTrash2 size={18} />
                 </button>
               </div>
             </div>
           </div>
         ))}
       </div>
-
-      {/* Empty State */}
-      {filteredRooms.length === 0 && (
-        <div className="py-32 text-center bg-white rounded-[3rem] border border-dashed border-stone-200">
-          <FiXCircle className="mx-auto text-stone-200 mb-4" size={48} />
-          <h3 className="text-xl font-serif italic text-stone-400 mb-2">No rooms match your filter.</h3>
-          <button 
-            onClick={() => {setSearchQuery(""); setActiveCategory("All")}}
-            className="text-stone-900 font-bold underline text-[10px] uppercase tracking-widest"
-          >
-            Reset all filters
-          </button>
-        </div>
-      )}
     </div>
+  );
+}
+
+// Sub-component untuk Badge Status Warna-warni ala Dabang
+function StatusBadge({ status }) {
+  const styles = {
+    Available: "bg-[#DCFCE7] text-[#3CD856]",
+    Booked: "bg-[#FFF4DE] text-[#FF947A]",
+    Maintenance: "bg-[#FFE2E5] text-[#FA5A7D]",
+  };
+
+  return (
+    <span className={`px-4 py-1.5 rounded-xl text-[11px] font-bold shadow-sm ${styles[status] || "bg-gray-100 text-gray-500"}`}>
+      {status}
+    </span>
   );
 }

@@ -1,51 +1,39 @@
 import { FiSearch, FiBell, FiChevronDown } from "react-icons/fi";
 
-export default function Header() {
+export default function Navbar() {
   return (
-    <header className="h-20 bg-white/80 backdrop-blur-md border-b border-stone-100 flex items-center justify-between px-8 sticky top-0 z-40">
-      
-      {/* 1. SEARCH BAR */}
-      <div className="relative w-96 group">
-        <FiSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-stone-400 group-focus-within:text-amber-600 transition-colors" />
+    <nav className="h-24 bg-[#FAFBFF] px-10 flex items-center justify-between sticky top-0 z-40">
+      <h2 className="text-2xl font-bold text-[#151D48]">Dashboard</h2>
+
+      {/* Search Bar Membulat */}
+      <div className="relative w-96">
+        <FiSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-[#5D5FEF]" />
         <input 
           type="text" 
-          placeholder="Search bookings, guests, or rooms..." 
-          className="w-full bg-stone-50 border-none rounded-2xl py-2.5 pl-12 pr-4 text-sm focus:ring-2 focus:ring-stone-100 transition-all outline-none"
+          placeholder="Search here..." 
+          className="w-full bg-[#F5F6FA] border-none pl-12 pr-6 py-3 rounded-2xl text-xs outline-none text-[#737791]"
         />
       </div>
 
-      {/* 2. ACTIONS & PROFILE */}
       <div className="flex items-center gap-6">
-        
-        {/* Notifikasi */}
-        <button className="relative p-2.5 bg-stone-50 rounded-xl text-stone-500 hover:bg-stone-100 hover:text-stone-900 transition-all">
+        <div className="flex items-center gap-2 bg-[#FFF9F1] px-4 py-2 rounded-xl border border-[#FFD9A1]">
+            <span className="text-xs font-bold text-[#FF9209]">Eng (US)</span>
+            <FiChevronDown className="text-[#FF9209]" />
+        </div>
+
+        <button className="p-3 bg-[#FFF0F0] text-[#FF5B5B] rounded-xl relative">
           <FiBell size={20} />
-          <span className="absolute top-2 right-2 w-2 h-2 bg-amber-500 rounded-full border-2 border-white"></span>
+          <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border-2 border-[#FFF0F0]"></span>
         </button>
 
-        {/* Separator */}
-        <div className="h-8 w-[1px] bg-stone-100 mx-2"></div>
-
-        {/* Profile Dropdown */}
-        <button className="flex items-center gap-3 group">
-          <div className="text-right hidden md:block">
-            <p className="text-[13px] font-bold text-stone-900 leading-none">Nabila Putri</p>
-            <p className="text-[10px] font-bold text-amber-600 uppercase tracking-widest mt-1">Super Admin</p>
+        <div className="flex items-center gap-3">
+          <img src="https://i.pravatar.cc/150?u=musfiq" className="w-10 h-10 rounded-xl object-cover" alt="user" />
+          <div>
+            <p className="text-sm font-bold text-[#151D48]">Musfiq</p>
+            <p className="text-[10px] text-[#737791] font-medium">Admin</p>
           </div>
-          
-          <div className="relative">
-            <div className="w-10 h-10 rounded-2xl overflow-hidden border-2 border-stone-50 group-hover:border-amber-200 transition-all">
-              <img 
-                src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=150" 
-                alt="Profile" 
-                className="w-full h-full object-cover"
-              />
-            </div>
-          </div>
-          
-          <FiChevronDown className="text-stone-400 group-hover:text-stone-900 transition-colors" />
-        </button>
+        </div>
       </div>
-    </header>
+    </nav>
   );
 }
