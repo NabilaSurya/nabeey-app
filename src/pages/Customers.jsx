@@ -1,23 +1,34 @@
 import { useState, useEffect } from "react";
-import { FiSearch, FiMail, FiPhone, FiMoreVertical, FiUserPlus, FiFilter } from "react-icons/fi";
+import { FiUserPlus, FiMail, FiPhone, FiMoreVertical } from "react-icons/fi";
+
+// Import Komponen Global (Semua Terpasang Nyata & Sinkron Tema)
+import LoadingSpinner from "../components/LoadingSpinner";
+import Footer from "../components/Footer";
+import SectionHeading from "../components/SectionHeading";
+import PrimaryButton from "../components/PrimaryButton";
+import SearchBar from "../components/SearchBar";
+import EmptyState from "../components/EmptyState";
+import FilterSelect from "../components/FilterSelect";
+import StatusBadge from "../components/StatusBadge";
 
 const customerData = [
   { id: "C-001", name: "Alexander Graham", email: "alex@example.com", phone: "+62 812-3456", room: "Oceanic Deluxe", checkIn: "12 May", checkOut: "15 May", status: "In-House" },
   { id: "C-002", name: "Sarah Connor", email: "sarah@sky.net", phone: "+62 855-9988", room: "Royal Penthouse", checkIn: "14 May", checkOut: "20 May", status: "In-House" },
   { id: "C-003", name: "Bruce Wayne", email: "bruce@bat.com", phone: "+62 811-0000", room: "Garden Villa", checkIn: "10 May", checkOut: "14 May", status: "Checking Out" },
   { id: "C-004", name: "Diana Prince", email: "diana@themyscira.io", phone: "+62 812-1122", room: "Sky Loft Penthouse", checkIn: "13 May", checkOut: "16 May", status: "In-House" },
-  { id: "C-005", name: "Tony Stark", email: "tony@stark.com", phone: "+62 813-3000", room: "Presidential Suite", checkIn: "11 May", checkOut: "14 May", status: "Checking Out" },
-  { id: "C-006", name: "Natasha Romanoff", email: "nat@widow.ru", phone: "+62 877-4455", room: "Modern Heritage", checkIn: "14 May", checkOut: "17 May", status: "In-House" },
-  { id: "C-007", name: "Wanda Maximoff", email: "wanda@vision.com", phone: "+62 899-2233", room: "Oceanic Deluxe", checkIn: "12 May", checkOut: "18 May", status: "In-House" },
-  { id: "C-008", name: "Steve Rogers", email: "cap@america.us", phone: "+62 812-1945", room: "Classic Suite", checkIn: "09 May", checkOut: "13 May", status: "Completed" },
-  { id: "C-009", name: "Peter Parker", email: "peter@dailybugle.com", phone: "+62 852-7788", room: "Minimalist Loft", checkIn: "14 May", checkOut: "15 May", status: "In-House" },
-  { id: "C-010", name: "Arthur Curry", email: "aquaman@atlantis.com", phone: "+62 812-0001", room: "Oceanic Deluxe", checkIn: "10 May", checkOut: "20 May", status: "In-House" },
+  { id: "C-010", name: "Arthur Curry", email: "aquaman@atlantis.com", phone: "+62 812-0001", room: "Oceanic Deluxe", checkIn: "10 May", checkOut: "20 May", status: "Completed" },
 ];
 
 export default function Customers() {
   const [filteredGuests, setFilteredGuests] = useState(customerData);
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("All");
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setLoading(false), 500);
+    return () => clearTimeout(timer);
+  }, []);
 
   useEffect(() => {
     const result = customerData.filter((guest) => {
@@ -29,137 +40,88 @@ export default function Customers() {
     setFilteredGuests(result);
   }, [searchQuery, statusFilter]);
 
-  return (
-    <div className="w-full bg-[#F5F5F7] min-h-screen animate-in fade-in duration-700 font-['Inter',_sans-serif]">
-      {/* Header Section */}
-      <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-10">
-        <div>
-          <h1 className="text-[28px] md:text-[32px] font-bold text-[#151D48] tracking-tight leading-[1.2]">
-            Guest Directory
-          </h1>
-          <p className="text-[#6B7280] text-[13px] mt-1">
-            Monitoring <span className="font-bold text-[#5B5FEF]">{filteredGuests.length}</span> active guests in the system.
-          </p>
-        </div>
-        <button className="flex items-center gap-3 bg-[#5B5FEF] text-white px-7 py-3.5 rounded-2xl font-semibold text-[14px] hover:bg-[#4a4ce0] transition-all shadow-lg shadow-indigo-100 active:scale-95">
-          <FiUserPlus size={18} />
-          <span>Add New Guest</span>
-        </button>
-      </header>
+  if (loading) return <LoadingSpinner />;
 
-      {/* Toolbar: Search & Filter ala Dabang */}
-      <div className="bg-white p-5 rounded-[28px] border border-[#F5F5F7] shadow-sm mb-8 flex flex-col lg:flex-row gap-4 items-center">
-        <div className="relative flex-1 w-full group">
-          <FiSearch className="absolute left-5 top-1/2 -translate-y-1/2 text-[#6B7280] group-focus-within:text-[#5B5FEF]" size={18} />
-          <input 
-            type="text" 
-            placeholder="Search by guest name or room details..." 
-            className="w-full bg-[#F5F5F7] border-none pl-12 pr-6 py-3.5 rounded-2xl outline-none text-[13px] text-[#151D48] font-medium focus:ring-2 focus:ring-[#5B5FEF]/20 transition-all"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-          />
-        </div>
+  return (
+    <div className="flex flex-col min-h-screen justify-between bg-[#F8F9FC] font-['Inter',_sans-serif] antialiased text-[#151D48]">
+      <div className="space-y-7 p-6 md:p-8 animate-in fade-in duration-700 flex-1 max-w-[1600px] w-full mx-auto">
         
-        <div className="flex items-center gap-3 w-full lg:w-auto bg-[#F5F5F7] px-4 py-2 rounded-2xl">
-          <FiFilter className="text-[#5B5FEF]" />
-          <select 
-            className="bg-transparent border-none text-[13px] font-bold text-[#6B7280] outline-none cursor-pointer pr-8"
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
-          >
-            <option value="All">All Status</option>
-            <option value="In-House">In-House</option>
-            <option value="Checking Out">Checking Out</option>
-            <option value="Completed">Completed</option>
-          </select>
+        {/* Header Section */}
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <SectionHeading title="Guest Directory" subtitle={`Monitoring ${filteredGuests.length} active guests in the system.`} />
+          <PrimaryButton icon={<FiUserPlus size={18} />} onClick={() => alert("Add Guest")}>
+            Add New Guest
+          </PrimaryButton>
         </div>
-      </div>
 
-      {/* Table Card */}
-      <div className="bg-white rounded-[32px] shadow-[0_10px_30px_rgba(0,0,0,0.02)] border border-[#F5F5F7] overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse">
-            <thead className="bg-[#FAFBFF]">
-              <tr className="border-b border-[#F5F5F7]">
-                <th className="px-8 py-5 text-[11px] font-bold text-[#6B7280] uppercase tracking-wider">Guest Information</th>
-                <th className="px-8 py-5 text-[11px] font-bold text-[#6B7280] uppercase tracking-wider">Room Details</th>
-                <th className="px-8 py-5 text-[11px] font-bold text-[#6B7280] uppercase tracking-wider">Stay Period</th>
-                <th className="px-8 py-5 text-[11px] font-bold text-[#6B7280] uppercase tracking-wider">Status</th>
-                <th className="px-8 py-5 text-right text-[11px] font-bold text-[#6B7280] uppercase tracking-wider">Action</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-[#F5F5F7]">
-              {filteredGuests.length > 0 ? (
-                filteredGuests.map((guest) => (
-                  <tr key={guest.id} className="hover:bg-[#F5F5F7]/30 transition-colors group">
-                    <td className="px-8 py-6">
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-xl bg-[#F3E8FF] flex items-center justify-center text-[#BF83FF] font-bold text-xs uppercase">
-                          {guest.name.charAt(0)}
-                        </div>
-                        <div className="flex flex-col">
-                          <span className="text-[14px] font-bold text-[#151D48] group-hover:text-[#5B5FEF] transition-colors">{guest.name}</span>
-                          <span className="text-[11px] text-[#6B7280] font-medium mt-0.5">{guest.id}</span>
-                        </div>
-                      </div>
-                    </td>
-                    <td className="px-8 py-6">
-                      <div className="flex flex-col">
-                        <span className="text-[13px] text-[#151D48] font-semibold">{guest.room}</span>
-                        <div className="flex gap-3 mt-1.5 text-[#6B7280]">
-                          <FiMail size={14} className="hover:text-[#5B5FEF] cursor-pointer" />
-                          <FiPhone size={14} className="hover:text-[#5B5FEF] cursor-pointer" />
-                        </div>
-                      </div>
-                    </td>
-                    <td className="px-8 py-6">
-                      <div className="flex flex-col">
-                        <span className="text-[13px] font-bold text-[#151D48]">{guest.checkIn} — {guest.checkOut}</span>
-                        <span className="text-[11px] text-[#6B7280] mt-0.5">May 2026</span>
-                      </div>
-                    </td>
-                    <td className="px-8 py-6">
-                      <StatusBadge status={guest.status} />
-                    </td>
-                    <td className="px-8 py-6 text-right">
-                      <button className="p-2.5 bg-[#F5F5F7] text-[#6B7280] rounded-xl hover:bg-[#5B5FEF] hover:text-white transition-all">
-                        <FiMoreVertical size={16} />
-                      </button>
-                    </td>
+        {/* Toolbar Filter */}
+        <div className="bg-white p-6 rounded-[1.5rem] shadow-[0px_8px_24px_rgba(69,78,124,0.04)] flex flex-col lg:flex-row gap-4 items-center border border-[#EDF2F7]">
+          <div className="flex-1 w-full">
+            <SearchBar value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} placeholder="Search by guest name or room details..." />
+          </div>
+          <div className="w-full lg:w-auto">
+            <FilterSelect value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} options={["All", "In-House", "Checking Out", "Completed"]} />
+          </div>
+        </div>
+
+        {/* Table Container */}
+        <div className="bg-white rounded-[1.5rem] shadow-[0px_8px_32px_rgba(69,78,124,0.03)] overflow-hidden border border-[#EDF2F7]">
+          {filteredGuests.length === 0 ? (
+            <EmptyState message="No matching guests found." onClear={() => { setSearchQuery(""); setStatusFilter("All"); }} />
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full text-left border-collapse m-0">
+                <thead>
+                  <tr className="bg-white border-b border-[#F4F5F9]">
+                    <th className="px-8 py-5 text-[13px] font-semibold text-[#737791] tracking-normal">Guest Information</th>
+                    <th className="px-8 py-5 text-[13px] font-semibold text-[#737791] tracking-normal">Room Details</th>
+                    <th className="px-8 py-5 text-[13px] font-semibold text-[#737791] tracking-normal">Current Status</th>
+                    <th className="px-8 py-5 text-right text-[13px] font-semibold text-[#737791] tracking-normal">Action</th>
                   </tr>
-                ))
-              ) : (
-                <tr>
-                  <td colSpan="5" className="px-8 py-24 text-center">
-                    <div className="flex flex-col items-center">
-                        <div className="w-16 h-16 bg-[#F5F5F7] rounded-full flex items-center justify-center mb-4">
-                            <FiSearch size={24} className="text-[#6B7280]" />
+                </thead>
+                <tbody className="divide-y divide-[#F4F5F9]">
+                  {filteredGuests.map((guest) => (
+                    <tr key={guest.id} className="hover:bg-[#F8F9FC]/80 transition-colors group">
+                      <td className="px-8 py-5">
+                        <div className="flex items-center gap-4">
+                          <div className="w-11 h-11 rounded-xl bg-[#F3E8FF] text-[#5B5FEF] font-bold text-sm flex items-center justify-center shadow-inner uppercase">
+                            {guest.name.charAt(0)}
+                          </div>
+                          <div className="flex flex-col">
+                            <span className="text-[15px] font-bold text-[#151D48] group-hover:text-[#5B5FEF] transition-colors duration-150">
+                              {guest.name}
+                            </span>
+                            <span className="text-[12px] text-[#737791] font-medium mt-0.5">{guest.id}</span>
+                          </div>
                         </div>
-                        <p className="text-[#6B7280] font-medium text-[15px]">No matching guests found.</p>
-                        <button onClick={() => {setSearchQuery(""); setStatusFilter("All")}} className="mt-2 text-[#5B5FEF] font-bold text-sm">Clear Filters</button>
-                    </div>
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
+                      </td>
+                      <td className="px-8 py-5">
+                        <div className="flex flex-col justify-center">
+                          <span className="text-[14px] text-[#151D48] font-semibold">{guest.room}</span>
+                          <div className="flex gap-4 mt-2 text-[#737791]">
+                            <FiMail size={15} className="hover:text-[#5B5FEF] cursor-pointer transition-colors" title={guest.email} />
+                            <FiPhone size={15} className="hover:text-[#5B5FEF] cursor-pointer transition-colors" title={guest.phone} />
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-8 py-5">
+                        <StatusBadge status={guest.status} />
+                      </td>
+                      <td className="px-8 py-5 text-right">
+                        <button className="p-2.5 bg-white text-[#737791] rounded-xl hover:bg-[#5B5FEF] hover:text-white border border-[#E2E8F0] hover:border-transparent transition-all duration-150 shadow-sm inline-flex items-center justify-center">
+                          <FiMoreVertical size={16} />
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
         </div>
+
       </div>
+      <Footer />
     </div>
-  );
-}
-
-// Badge Component dengan warna Dabang
-function StatusBadge({ status }) {
-  const styles = {
-    "In-House": "bg-[#DCFCE7] text-[#3CD856]",
-    "Checking Out": "bg-[#FFF4DE] text-[#FF947A]",
-    "Completed": "bg-[#F3E8FF] text-[#BF83FF]",
-  };
-
-  return (
-    <span className={`px-4 py-1.5 rounded-xl text-[11px] font-bold shadow-sm inline-block ${styles[status] || "bg-[#F5F5F7] text-[#6B7280]"}`}>
-      {status}
-    </span>
   );
 }

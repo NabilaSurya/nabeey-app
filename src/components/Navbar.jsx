@@ -1,9 +1,32 @@
+import { useLocation } from "react-router-dom"; // 👈 Tambahkan ini untuk membaca URL aktif
 import { FiSearch, FiBell, FiChevronDown } from "react-icons/fi";
 
 export default function Navbar() {
+  const location = useLocation(); // 👈 Ambil data lokasi path saat ini
+
+  // 🗺️ Mapping Judul otomatis berdasarkan path URL browser kamu
+  const getPageTitle = () => {
+    switch (location.pathname) {
+      case "/":
+        return "Dashboard";
+      case "/about":
+        return "About Brand";
+      case "/rooms":
+        return "Room Inventory";
+      case "/settings":
+        return "Settings";
+      default:
+        return "Dashboard"; // Judul default jika path tidak dikenal
+    }
+  };
+
   return (
     <nav className="h-24 bg-[#FAFBFF] px-10 flex items-center justify-between sticky top-0 z-40">
-      <h2 className="text-2xl font-bold text-[#151D48]">Dashboard</h2>
+      
+      {/* 🔮 JUDUL DINAMIS: Otomatis berubah setiap ganti menu */}
+      <h2 className="text-2xl font-bold text-[#151D48] min-w-[200px]">
+        {getPageTitle()}
+      </h2>
 
       {/* Search Bar Membulat */}
       <div className="relative w-96">
@@ -17,8 +40,8 @@ export default function Navbar() {
 
       <div className="flex items-center gap-6">
         <div className="flex items-center gap-2 bg-[#FFF9F1] px-4 py-2 rounded-xl border border-[#FFD9A1]">
-            <span className="text-xs font-bold text-[#FF9209]">Eng (US)</span>
-            <FiChevronDown className="text-[#FF9209]" />
+          <span className="text-xs font-bold text-[#FF9209]">Eng (US)</span>
+          <FiChevronDown className="text-[#FF9209]" />
         </div>
 
         <button className="p-3 bg-[#FFF0F0] text-[#FF5B5B] rounded-xl relative">
