@@ -121,7 +121,6 @@ export default function Customers() {
         </div>
 
       </div>
-      <Footer />
     </div>
   );
 }
