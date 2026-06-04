@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { FiUser, FiBell, FiShield, FiGlobe, FiCamera, FiCheck, FiSave, FiLogOut } from "react-icons/fi";
+import { useState, useEffect } from "react";
+import { FiUser, FiBell, FiShield, FiGlobe, FiCamera, FiCheck, FiSave, FiLogOut, FiLock, FiGlobe as FiLanguageIcon } from "react-icons/fi";
 
 // Memanggil Komponen Global LuxStay
 import SectionHeading from "../components/SectionHeading";
@@ -17,109 +17,174 @@ export default function Settings() {
   };
 
   const tabs = [
-    { name: "Profile", icon: <FiUser /> },
-    { name: "Notifications", icon: <FiBell /> },
-    { name: "Security", icon: <FiShield /> },
-    { name: "Language", icon: <FiGlobe /> },
+    { name: "Profile", icon: <FiUser />, desc: "Admin identity & contact" },
+    { name: "Notifications", icon: <FiBell />, desc: "Alerts & reporting logs" },
+    { name: "Security", icon: <FiShield />, desc: "Password & global access" },
+    { name: "Language", icon: <FiGlobe />, desc: "Regional localization" },
   ];
 
   return (
-    <div className="w-full bg-[#FDFCFB] min-h-screen animate-in fade-in duration-700">
+    <div className="w-full bg-[#FAFBFF] min-h-screen font-['Inter',_sans-serif] antialiased text-[#151D48] p-6 md:p-8 animate-in fade-in duration-500">
       
-      {/* Header Atas */}
-      <SectionHeading title="System Settings" subtitle="Configure system protocols and administrative preferences.">
-        <PrimaryButton onClick={handleSave} icon={isSaved ? <FiCheck size={14} /> : <FiSave size={14} />}>
-          {isSaved ? "Saved Successfully" : "Apply Changes"}
-        </PrimaryButton>
-      </SectionHeading>
+      {/* ==================== ROW 1: HEADER SECTION ==================== */}
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
+        <div>
+          <h1 className="text-xl font-bold tracking-tight text-[#151D48]">System Settings</h1>
+          <p className="text-xs text-[#737791]">Configure core system protocols and administrative preferences.</p>
+        </div>
+        <button 
+          onClick={handleSave}
+          className={`flex items-center gap-2 text-xs font-semibold py-2.5 px-4 rounded-xl shadow-xs border transition-all duration-300 ${
+            isSaved 
+              ? "bg-[#DCFCE7] text-[#3CD856] border-[#3CD856]/20" 
+              : "bg-[#5B5FEF] hover:bg-[#4a4de0] text-white border-transparent"
+          }`}
+        >
+          {isSaved ? <FiCheck className="animate-bounce" /> : <FiSave />}
+          {isSaved ? "Changes Applied Successfully" : "Apply Global Changes"}
+        </button>
+      </div>
 
-      <div className="grid lg:grid-cols-4 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 items-start">
         
-        {/* Tab Navigasi Samping */}
-        <div className="flex flex-col gap-1">
+        {/* ==================== ROW 2: SIDE TAB NAVIGATION ==================== */}
+        <div className="flex flex-col sm:grid sm:grid-cols-2 lg:flex lg:flex-col gap-2">
           {tabs.map((tab) => (
             <button
               key={tab.name}
               onClick={() => setActiveTab(tab.name)}
-              className={`flex items-center gap-4 px-5 py-3.5 rounded-xl text-xs uppercase tracking-wider font-semibold transition-all ${
+              className={`flex items-center gap-4 px-4 py-3.5 rounded-2xl text-left border transition-all duration-200 group ${
                 activeTab === tab.name 
-                ? "bg-stone-900 text-white shadow-sm" 
-                : "text-stone-400 hover:bg-stone-50 hover:text-stone-800"
+                  ? "bg-white text-[#5B5FEF] border-[#EDF2F7] shadow-[0px_8px_24px_rgba(69,78,124,0.03)] font-bold" 
+                  : "text-[#737791] bg-transparent border-transparent hover:bg-white/60 hover:text-[#151D48]"
               }`}
             >
-              <span className="text-base">{tab.icon}</span>
-              {tab.name}
+              <div className={`w-9 h-9 rounded-xl flex items-center justify-center text-lg transition-all duration-200 ${
+                activeTab === tab.name 
+                  ? "bg-[#F3E8FF] text-[#5B5FEF]" 
+                  : "bg-white text-[#737791] group-hover:bg-[#F4F5F9] border border-[#EDF2F7]"
+              }`}>
+                {tab.icon}
+              </div>
+              <div>
+                <p className="text-sm tracking-tight text-inherit">{tab.name}</p>
+                <p className="text-[10px] font-normal text-[#737791] mt-0.5 hidden lg:block">{tab.desc}</p>
+              </div>
             </button>
           ))}
         </div>
 
-        {/* Konten Utama Box Panel */}
+        {/* ==================== ROW 3: MAIN CONTENT BOX PANEL ==================== */}
         <div className="lg:col-span-3">
           
-          {/* TAB PANEL 1: PROFILE MANAGEMENT */}
+          {/* TAB 1: PROFILE MANAGEMENT */}
           {activeTab === "Profile" && (
-            <div className="bg-white p-8 rounded-2xl border border-stone-100 space-y-10 animate-in fade-in duration-300">
+            <div className="bg-white p-6 md:p-8 rounded-[1.5rem] shadow-[0px_6px_20px_rgba(69,78,124,0.015)] border border-[#EDF2F7] space-y-8 animate-in fade-in duration-300">
               
-              {/* Foto Profil */}
-              <div className="flex items-center gap-6">
-                <div className="relative group">
-                  <div className="w-20 h-20 bg-stone-50 rounded-xl overflow-hidden border border-stone-200 transition-transform duration-300 group-hover:scale-102">
-                    <img src="https://i.pravatar.cc/150?u=admin" alt="Admin" className="w-full h-full object-cover" />
+              {/* Premium Admin Identity Card */}
+              <div className="flex flex-col sm:flex-row items-center gap-6 p-5 bg-[#FAFBFF] border border-[#F4F5F9] rounded-2xl relative overflow-hidden">
+                <div className="absolute top-0 right-0 p-8 opacity-[0.03] text-[#5B5FEF] pointer-events-none">
+                  <FiUser size={120} />
+                </div>
+                
+                <div className="relative group cursor-pointer">
+                  <div className="w-20 h-20 bg-white rounded-2xl overflow-hidden border border-[#EDF2F7] p-1 shadow-xs transition-transform duration-300 group-hover:scale-[1.03]">
+                    <img src="https://i.pravatar.cc/150?u=luxuryadmin" alt="Admin Avatar" className="w-full h-full object-cover rounded-xl" />
                   </div>
-                  <button className="absolute -bottom-1 -right-1 bg-stone-900 text-white p-2 rounded-lg border-2 border-white hover:bg-stone-800 transition-all">
-                    <FiCamera size={12} />
+                  <button className="absolute -bottom-1 -right-1 bg-[#5B5FEF] text-white p-2 rounded-lg border-2 border-white shadow-xs hover:bg-[#4a4de0] transition-all">
+                    <FiCamera size={11} />
                   </button>
                 </div>
-                <div>
-                  <h3 className="text-base font-serif text-stone-800">System Administrator</h3>
-                  <p className="text-xs text-stone-400 mt-1 font-light">Max safe size upload of 800kB (PNG/JPG)</p>
+                
+                <div className="text-center sm:text-left">
+                  <div className="flex flex-col sm:flex-row items-center gap-2">
+                    <h3 className="text-base font-bold text-[#151D48]">System Administrator</h3>
+                    <span className="bg-[#E8F9EE] text-[#3CD856] text-[10px] font-bold px-2 py-0.5 rounded-md uppercase tracking-wider">Master Root</span>
+                  </div>
+                  <p className="text-xs text-[#737791] mt-1">Supervise global logistics, branch distribution, and secure checkouts.</p>
+                  <p className="text-[10px] text-[#A3AED0] mt-2 font-medium">JPEG or PNG. Max legal limit 800 KB</p>
                 </div>
               </div>
 
-              {/* Form Input Terintegrasi dengan Komponen InputGroup */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <InputGroup label="Full Representative Name" value="Musfiq Admin" />
+              {/* Form Input Grid */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-5 text-sm">
+                <InputGroup label="Full Representative Name" value="Musfiq Admin" className="focus:border-[#5B5FEF]" />
                 <InputGroup label="Official Secure Email" value="admin@luxstay.luxury" />
                 <InputGroup label="Phone Verification" value="+62 21 5550 998" />
                 <InputGroup label="Assigned Hotel Branch" value="LuxStay - Bali Central" />
               </div>
 
-              {/* Input Catatan (Bio) */}
-              <div className="pt-6 border-t border-stone-100">
-                <label className="text-[10px] uppercase font-bold tracking-widest text-stone-400 mb-3 block ml-1">Management Motto / Statement</label>
+              {/* Statement Motto Textarea */}
+              <div className="pt-5 border-t border-[#F4F5F9]">
+                <label className="text-[11px] uppercase font-bold tracking-wider text-[#737791] mb-2 block">Management Motto / System Statement</label>
                 <textarea 
-                  className="w-full bg-white border border-stone-200 p-4 rounded-xl text-sm text-stone-800 outline-none focus:border-stone-900 transition-all duration-300 min-h-[100px] leading-relaxed"
+                  className="w-full bg-[#FAFBFF] border border-[#EDF2F7] p-3.5 rounded-xl text-xs text-[#425166] outline-hidden focus:border-[#5B5FEF] focus:bg-white transition-all duration-200 min-h-[90px] leading-relaxed"
                   defaultValue="Curating luxury experiences with a touch of heritage since 1994."
                 />
               </div>
             </div>
           )}
 
-          {/* TAB PANEL 2: NOTIFICATIONS TOGGLE PANEL */}
+          {/* TAB 2: NOTIFICATIONS */}
           {activeTab === "Notifications" && (
-            <div className="bg-white p-8 rounded-2xl border border-stone-100 space-y-2 animate-in fade-in duration-300">
-              <h2 className="text-lg font-serif text-stone-800 mb-6">Alert Configurations</h2>
-              <ToggleRow title="Automated Occupancy Logs" desc="Kirim email rekap harian tingkat hunian hotel secara terjadwal." active={true} />
-              <ToggleRow title="Live Booking Push Notifications" desc="Nyalakan bunyi alert instan setiap kali ada reservasi baru masuk." active={true} />
-              <ToggleRow title="System Maintenance Broadcasts" desc="Dapatkan info pembaruan fitur dashboard dan jadwal downtime." active={false} />
+            <div className="bg-white p-6 md:p-8 rounded-[1.5rem] shadow-[0px_6px_20px_rgba(69,78,124,0.015)] border border-[#EDF2F7] space-y-4 animate-in fade-in duration-300">
+              <div className="mb-4">
+                <h2 className="text-base font-bold text-[#151D48]">Alert Configurations</h2>
+                <p className="text-xs text-[#737791]">Manage automated broadcast triggers and dashboard hooks.</p>
+              </div>
+              <div className="divide-y divide-[#F4F5F9] text-sm">
+                <div className="pb-4"><ToggleRow title="Automated Occupancy Logs" desc="Send a daily system audit graph summarizing check-in distributions directly to inbox." active={true} /></div>
+                <div className="py-4"><ToggleRow title="Live Booking Push Notifications" desc="Trigger instant chime sound and toaster pop-up immediately upon room checkout completion." active={true} /></div>
+                <div className="pt-4"><ToggleRow title="System Maintenance Broadcasts" desc="Receive urgent notifications regarding deployment updates and core server maintenance schedules." active={false} /></div>
+              </div>
             </div>
           )}
 
-          {/* TAB PANEL 3: SECURITY */}
+          {/* TAB 3: SECURITY */}
           {activeTab === "Security" && (
-            <div className="bg-white p-8 rounded-2xl border border-stone-100 space-y-8 animate-in fade-in duration-300">
-              <div className="space-y-6">
-                <h3 className="text-sm uppercase tracking-wider text-stone-400 font-bold">Update Master Account Credentials</h3>
-                <div className="grid gap-6 max-w-sm">
-                  <InputGroup label="Current Account Password" type="password" placeholder="••••••••" />
-                  <InputGroup label="Set Brand New Password" type="password" />
-                </div>
+            <div className="bg-white p-6 md:p-8 rounded-[1.5rem] shadow-[0px_6px_20px_rgba(69,78,124,0.015)] border border-[#EDF2F7] space-y-6 animate-in fade-in duration-300">
+              <div>
+                <h2 className="text-base font-bold text-[#151D48]">Account Credentials</h2>
+                <p className="text-xs text-[#737791]">Configure master server keys and secure hash protections.</p>
               </div>
-              <div className="pt-8 border-t border-stone-100 flex flex-col sm:flex-row gap-4 justify-between items-start sm:items-center">
-                 <p className="text-xs text-stone-400">Security Note: Password was modified 3 months ago.</p>
-                 <button className="flex items-center gap-2 text-rose-600 text-xs font-bold uppercase tracking-widest hover:underline transition-all">
-                   <FiLogOut /> Terminate other active sessions
-                 </button>
+              
+              <div className="grid gap-5 max-w-md">
+                <InputGroup label="Current Master Password" type="password" placeholder="••••••••" />
+                <InputGroup label="Set Brand New Secure Password" type="password" placeholder="••••••••" />
+              </div>
+              
+              <div className="pt-6 border-t border-[#F4F5F9] flex flex-col sm:flex-row gap-4 justify-between items-start sm:items-center text-xs">
+                <p className="text-[#A3AED0] flex items-center gap-1.5"><FiLock /> Dynamic security token updated 3 months ago.</p>
+                <button className="flex items-center gap-2 text-[#FA5A7D] font-bold uppercase tracking-wider hover:text-red-600 transition-colors">
+                  <FiLogOut /> Kill other active sessions
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* TAB 4: LANGUAGE (BARU: DIMUNCULKAN SECARA ESTETIK) */}
+          {activeTab === "Language" && (
+            <div className="bg-white p-6 md:p-8 rounded-[1.5rem] shadow-[0px_6px_20px_rgba(69,78,124,0.015)] border border-[#EDF2F7] space-y-6 animate-in fade-in duration-300">
+              <div>
+                <h2 className="text-base font-bold text-[#151D48]">Localization & Region</h2>
+                <p className="text-xs text-[#737791]">Set the primary system language display and localized pricing format.</p>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 max-w-xl text-xs">
+                <div>
+                  <label className="text-[11px] uppercase font-bold tracking-wider text-[#737791] mb-2 block">System Language</label>
+                  <select className="w-full bg-[#FAFBFF] border border-[#EDF2F7] p-3 rounded-xl text-[#151D48] outline-hidden focus:border-[#5B5FEF] font-medium">
+                    <option value="en">English (US) - Standard Master</option>
+                    <option value="id">Bahasa Indonesia (ID) - Localized</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="text-[11px] uppercase font-bold tracking-wider text-[#737791] mb-2 block">Default Currency Display</label>
+                  <select className="w-full bg-[#FAFBFF] border border-[#EDF2F7] p-3 rounded-xl text-[#151D48] outline-hidden focus:border-[#5B5FEF] font-medium">
+                    <option value="usd">USD ($) - Global Benchmark</option>
+                    <option value="idr">IDR (Rp) - Rupiah Localization</option>
+                  </select>
+                </div>
               </div>
             </div>
           )}
