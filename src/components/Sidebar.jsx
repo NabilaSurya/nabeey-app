@@ -19,6 +19,7 @@ export default function Sidebar() {
     { to: "/rooms", icon: <FiLayers />, label: "Our Rooms" },
     { to: "/customers", icon: <FiUsers />, label: "Customers" },
     { to: "/about", icon: <FiInfo />, label: "About Us" },
+    { to: "/member", icon: <FiUsers />, label: "Member" },
     { to: "/settings", icon: <FiSettings />, label: "Settings" },
   ];
 

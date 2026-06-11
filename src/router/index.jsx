@@ -14,7 +14,7 @@ const Login = lazy(() => import("../pages/Login"));
 const Register = lazy(() => import("../pages/Register"));
 const Customers = lazy(() => import("../pages/Customers"));
 const Settings = lazy(() => import("../pages/Settings"));
-
+const Member = lazy(() => import("../pages/Member"));
 // Tambahan untuk Error & NotFound
 const NotFound = lazy(() => import("../pages/NotFound"));
 const ErrorPage = lazy(() => import("../pages/ErrorPage"));
@@ -50,6 +50,10 @@ const router = createBrowserRouter([
       {
         path: "customers",
         element: <Customers />,
+      },
+      {
+        path: "member",
+        element: <Member />,
       },
       {
         path: "settings",
