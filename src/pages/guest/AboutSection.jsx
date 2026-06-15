@@ -95,7 +95,7 @@ export default function ServicesSection() {
                   <input 
                     type="text" 
                     required
-                    placeholder="Contoh: Fajar Ramadhan"
+                    placeholder="Contoh: Nabila surya"
                     value={formData.name}
                     onChange={(e) => setFormData({...formData, name: e.target.value})}
                     className="w-full bg-white border border-slate-200 px-3 py-2.5 rounded-xl text-sm focus:outline-none focus:border-[#5B5FEF] transition-colors"
@@ -110,7 +110,7 @@ export default function ServicesSection() {
                   <input 
                     type="email" 
                     required
-                    placeholder="fajar@email.com"
+                    placeholder="nab@email.com"
                     value={formData.email}
                     onChange={(e) => setFormData({...formData, email: e.target.value})}
                     className="w-full bg-white border border-slate-200 px-3 py-2.5 rounded-xl text-sm focus:outline-none focus:border-[#5B5FEF] transition-colors"
