@@ -1,5 +1,5 @@
 import { lazy, Suspense } from "react";
-import { createBrowserRouter, Navigate } from "react-router-dom";
+import { createBrowserRouter, Navigate } from "react-router-dom"; // Tambah Navigate untuk mengarahkan rute kosong jika perlu
 import LoadingSpinner from "../components/LoadingSpinner";
 
 // Layouts
@@ -14,7 +14,12 @@ const Login = lazy(() => import("../pages/Login"));
 const Register = lazy(() => import("../pages/Register"));
 const Customers = lazy(() => import("../pages/Customers"));
 const Settings = lazy(() => import("../pages/Settings"));
-const Member = lazy(() => import("../pages/Member"));
+
+// Halaman-halaman Mandiri (BEBAS SIDEBAR)
+const Member = lazy(() => import("../pages/Member")); // Ini untuk Admin/Dashboard utama member sebelumnya
+const MemberLanding = lazy(() => import("../pages/member/MemberLanding")); // Halaman Baru untuk Portal Member Biasa
+const Guest = lazy(() => import("../pages/guest/GuestPage"));
+
 // Tambahan untuk Error & NotFound
 const NotFound = lazy(() => import("../pages/NotFound"));
 const ErrorPage = lazy(() => import("../pages/ErrorPage"));
@@ -52,20 +57,36 @@ const router = createBrowserRouter([
         element: <Customers />,
       },
       {
-        path: "member",
-        element: <Member />,
-      },
-      {
         path: "settings",
         element: <Settings />,
       },
-      // INI ADALAH NOT FOUND (404)
-      // Jika user ngetik asal di dalam domain utama, halaman ini muncul
+      {
+        path: "member",
+        element: <Member />,
+      },
       {
         path: "*",
         element: <NotFound />,
       },
     ],
+  },
+  {
+    // SEJAJAR DI SINI: Bebas dari jeratan sidebar MainLayout!
+    path: "/guest",
+    element: (
+      <Suspense fallback={<Loading />}>
+        <Guest />
+      </Suspense>
+    ),
+  },
+      {
+        // Rute khusus user/customer member biasa -> /member/MemberLanding
+        path: "MemberLanding",
+        element: (
+          <Suspense fallback={<Loading />}>
+            <MemberLanding />
+          </Suspense>
+        ),
   },
   {
     path: "/auth",
