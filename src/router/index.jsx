@@ -28,7 +28,7 @@ const Loading = () => <LoadingSpinner />;
 
 const router = createBrowserRouter([
   {
-    path: "/",
+    path: "/admin",
     element: (
       <Suspense fallback={<Loading />}>
         <MainLayout />
@@ -72,7 +72,7 @@ const router = createBrowserRouter([
   },
   {
     // SEJAJAR DI SINI: Bebas dari jeratan sidebar MainLayout!
-    path: "/guest",
+    path: "/",
     element: (
       <Suspense fallback={<Loading />}>
         <Guest />
