@@ -4,7 +4,6 @@ import { FiPlus, FiEdit3, FiTrash2, FiMoreVertical } from "react-icons/fi";
 // Import Komponen Global 
 import LoadingSpinner from "../components/LoadingSpinner"; 
 import Footer from "../components/Footer"; 
-import SectionHeading from "../components/SectionHeading";
 import PrimaryButton from "../components/PrimaryButton";
 import SearchBar from "../components/SearchBar";
 import FilterSelect from "../components/FilterSelect";
@@ -51,23 +50,23 @@ export default function Rooms() {
 
   return (
     <div className="flex flex-col min-h-screen justify-between bg-[#F8F9FC] font-['Inter',_sans-serif] antialiased text-[#151D48]">
-      <div className="space-y-7 p-6 md:p-8 animate-in fade-in duration-700 flex-1 max-w-[1600px] w-full mx-auto">
+      {/* 🛠️ Mengubah space-y-7 ke space-y-5 dan p-6 md:p-8 ke pt-2 px-6 pb-6 demi merapatkan ruang atas */}
+      <div className="space-y-5 pt-2 px-6 pb-6 md:px-8 md:pb-8 animate-in fade-in duration-700 flex-1 max-w-[1600px] w-full mx-auto">
         
-        {/* Header Utama Menggunakan PrimaryButton Ungu Baru */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <SectionHeading title="Room Inventory" subtitle="Manage property types, seasonal pricing, and instant allocations." />
+        {/* ==================== ROW 1: ACTION BUTTONS (JUDUL DIHAPUS) ==================== */}
+        <div className="flex justify-end items-center">
           <PrimaryButton icon={<FiPlus size={18} />} onClick={() => alert("Add Room")}>
             Add New Room
           </PrimaryButton>
         </div>
 
-        {/* Toolbar Filter */}
+        {/* ==================== ROW 2: TOOLBAR FILTER ==================== */}
         <div className="bg-white p-6 rounded-[1.5rem] shadow-[0px_8px_24px_rgba(69,78,124,0.04)] flex flex-col sm:flex-row gap-4 items-center w-full border border-[#EDF2F7]">
           <SearchBar placeholder="Search room name..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} />
           <FilterSelect value={activeCategory} onChange={(e) => setActiveCategory(e.target.value)} options={filterOptions} />
         </div>
 
-        {/* Tampilan Grid Kamar */}
+        {/* ==================== ROW 3: ROOMS GRID LIST ==================== */}
         {filteredRooms.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
             {filteredRooms.map((room) => (

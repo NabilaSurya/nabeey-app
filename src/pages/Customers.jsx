@@ -3,8 +3,6 @@ import { FiUserPlus, FiMail, FiPhone, FiMoreVertical, FiAward, FiGift, FiTrendin
 
 // Import Komponen Global (Semua Terpasang Nyata & Sinkron Tema)
 import LoadingSpinner from "../components/LoadingSpinner";
-import Footer from "../components/Footer";
-import SectionHeading from "../components/SectionHeading";
 import PrimaryButton from "../components/PrimaryButton";
 import SearchBar from "../components/SearchBar";
 import EmptyState from "../components/EmptyState";
@@ -64,22 +62,20 @@ export default function Customers() {
 
   return (
     <div className="flex flex-col min-h-screen justify-between bg-[#FAFBFF] font-['Inter',_sans-serif] antialiased text-[#151D48]">
-      <div className="space-y-7 p-6 md:p-8 animate-in fade-in duration-700 flex-1 max-w-[1600px] w-full mx-auto">
+      {/* 🛠️ Mengubah space-y-7 ke space-y-5 dan p-6 md:p-8 ke pt-2 px-6 pb-6 demi merapatkan ruang atas */}
+      <div className="space-y-5 pt-2 px-6 pb-6 md:px-8 md:pb-8 animate-in fade-in duration-700 flex-1 max-w-[1600px] w-full mx-auto">
         
-        {/* ==================== ROW 1: HEADER CRM ==================== */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <SectionHeading title="Guest CRM & Loyalty Hub" subtitle={`Mengelola database dari ${filteredGuests.length} profil pelanggan premium terdaftar.`} />
-          <div className="flex items-center gap-2.5 self-start sm:self-auto">
-            <button 
-              onClick={() => alert("Membuka katalog penukaran rewards hotel...")}
-              className="flex items-center gap-2 bg-white hover:bg-slate-50 text-[#151D48] text-xs font-semibold py-2.5 px-4 rounded-xl border border-[#EDF2F7] shadow-xs transition-all duration-200"
-            >
-              <FiGift size={14} className="text-[#5B5FEF]" /> Claim Rewards
-            </button>
-            <PrimaryButton icon={<FiUserPlus size={16} />} onClick={() => alert("Registrasi Member CRM Baru")}>
-              Add New Member
-            </PrimaryButton>
-          </div>
+        {/* ==================== ROW 1: ACTION BUTTONS ==================== */}
+        <div className="flex justify-end items-center gap-2.5">
+          <button 
+            onClick={() => alert("Membuka katalog penukaran rewards hotel...")}
+            className="flex items-center gap-2 bg-white hover:bg-slate-50 text-[#151D48] text-xs font-semibold py-2.5 px-4 rounded-xl border border-[#EDF2F7] shadow-xs transition-all duration-200"
+          >
+            <FiGift size={14} className="text-[#5B5FEF]" /> Claim Rewards
+          </button>
+          <PrimaryButton icon={<FiUserPlus size={16} />} onClick={() => alert("Registrasi Member CRM Baru")}>
+            Add New Member
+          </PrimaryButton>
         </div>
 
         {/* ==================== ROW 2: LOYALTY INSIGHT CARDS ==================== */}
@@ -164,14 +160,14 @@ export default function Customers() {
                         </div>
                       </td>
 
-                      {/* Kolom 2: Tier Hadiah CRM (Fitur Baru) */}
+                      {/* Kolom 2: Tier Hadiah CRM */}
                       <td className="px-7 py-4">
                         <span className={`px-3 py-1 rounded-lg text-[11px] font-bold tracking-wide ${getTierBadgeStyle(guest.tier)}`}>
                           {guest.tier} Member
                         </span>
                       </td>
 
-                      {/* Kolom 3: Poin dan Total Transaksi Keuangan Tamu (Fitur Baru) */}
+                      {/* Kolom 3: Poin dan Total Transaksi Keuangan Tamu */}
                       <td className="px-7 py-4">
                         <div className="flex flex-col">
                           <span className="text-xs font-bold text-[#151D48] flex items-center gap-1">

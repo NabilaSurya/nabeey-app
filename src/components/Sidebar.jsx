@@ -13,14 +13,14 @@ export default function Sidebar() {
   const location = useLocation();
   const navigate = useNavigate();
 
-  // Menyisipkan ikon-ikon yang pas dengan gambar di image_5a2cb0.png
+  // SUDAH DIPERBAIKI: Menambahkan prefix /admin agar rute mengarah ke halaman yang benar
   const menuItems = [
-    { to: "/", icon: <FiGrid />, label: "Dashboard" },
-    { to: "/rooms", icon: <FiLayers />, label: "Our Rooms" },
-    { to: "/customers", icon: <FiUsers />, label: "Customers" },
-    { to: "/about", icon: <FiInfo />, label: "About Us" },
-    { to: "/member", icon: <FiUsers />, label: "Member" },
-    { to: "/settings", icon: <FiSettings />, label: "Settings" },
+    { to: "/admin", icon: <FiGrid />, label: "Dashboard" },
+    { to: "/admin/rooms", icon: <FiLayers />, label: "Our Rooms" },
+    { to: "/admin/customers", icon: <FiUsers />, label: "Customers" },
+    { to: "/admin/pengaduan", icon: <FiInfo />, label: "Pengaduan" },
+    { to: "/admin/member", icon: <FiUsers />, label: "Member" },
+    { to: "/admin/settings", icon: <FiSettings />, label: "Settings" },
   ];
 
   const handleLogout = () => {
@@ -32,7 +32,7 @@ export default function Sidebar() {
     <aside className="w-64 bg-white flex flex-col h-screen sticky top-0 z-50 border-r border-[#EDF2F7]">
       <div className="p-6 flex flex-col h-full justify-between">
         
-        {/* BAGIAN ATAS: LOGO & NAV MENU (Digabung dalam satu div agar nempel rapat) */}
+        {/* BAGIAN ATAS: LOGO & NAV MENU */}
         <div className="space-y-6">
           
           {/* LOGO LUXE */}
@@ -45,10 +45,11 @@ export default function Sidebar() {
             </h1>
           </div>
 
-          {/* NAV MENU (Jarak antar menu disesuaikan persis seperti image_5a2cb0.png) */}
+          {/* NAV MENU */}
           <nav className="space-y-1.5">
             {menuItems.map((item) => {
-              const isActive = location.pathname === item.to || (item.to === "/about" && location.pathname === "/about-us") || (item.to === "/rooms" && location.pathname === "/our-rooms");
+              // SUDAH DIPERBAIKI: Pengecekan active-state disederhanakan dan disesuaikan dengan path /admin
+              const isActive = location.pathname === item.to;
               
               return (
                 <Link
@@ -68,7 +69,7 @@ export default function Sidebar() {
           </nav>
         </div>
 
-        {/* BAGIAN BAWAH: LOGOUT & CARD PRO (Otomatis berkumpul rapi di area bawah kontainer) */}
+        {/* BAGIAN BAWAH: LOGOUT & CARD PRO */}
         <div className="space-y-5">
           {/* LOGOUT */}
           <div className="px-2 border-t border-[#F4F5F9] pt-4">

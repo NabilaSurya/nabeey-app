@@ -37,7 +37,7 @@ export default function DashboardSection() {
       else { setBookings(bStart); }
     }, 20);
 
-    // Auto-play Slider Besar (Berganti otomatis setiap 6 detik)
+    // Auto-play Slider Besar
     const slideTimer = setInterval(() => {
       setCurrentSlide((prev) => (prev === slides.length - 1 ? 0 : prev + 1));
     }, 6000);
@@ -50,13 +50,12 @@ export default function DashboardSection() {
   }, [slides.length]);
 
   return (
-    <section id="dashboard" className="min-h-screen bg-white pt-28 pb-16 scroll-mt-20">
+    // 🛠️ PENYESUAIAN: Mengurangi pt-28 menjadi pt-20 agar konten terangkat naik ke viewport utama
+    <section id="dashboard" className="min-h-screen bg-white pt-20 pb-16 scroll-mt-20">
       <div className="max-w-7xl mx-auto px-6 md:px-8 w-full">
         
-        {/* 1. VISUAL UTAMA: SLIDER GAMBAR BESAR DENGAN GERAKAN AUTOMATIS (KEN BURNS EFFECT) */}
-        <div className="relative w-full h-[460px] md:h-[560px] rounded-[32px] overflow-hidden shadow-2xl border border-slate-100 bg-slate-900 group mb-12">
-          
-          {/* Loop semua slide agar transisi memudar (fade) & bergerak (zoom) berjalan mulus */}
+        {/* 1. VISUAL UTAMA: SLIDER GAMBAR BESAR */}
+        <div className="relative w-full h-[400px] md:h-[500px] rounded-[32px] overflow-hidden shadow-2xl border border-slate-100 bg-slate-900 group mb-8">
           {slides.map((slide, index) => (
             <div
               key={index}
@@ -72,7 +71,6 @@ export default function DashboardSection() {
                 }`}
               />
               
-              {/* Overlay Teks di Atas Gambar */}
               <div className="absolute inset-0 bg-gradient-to-t from-slate-950/90 via-slate-950/20 to-transparent flex flex-col justify-end p-8 md:p-12">
                 <span className="text-amber-400 text-xs font-black uppercase tracking-widest mb-2 block animate-fadeIn">
                   {slide.tagline}
@@ -84,7 +82,6 @@ export default function DashboardSection() {
             </div>
           ))}
 
-          {/* Tombol Navigasi Slider Manual */}
           <button 
             onClick={() => setCurrentSlide(currentSlide === 0 ? slides.length - 1 : currentSlide - 1)}
             className="absolute left-6 top-1/2 -translate-y-1/2 w-12 h-12 bg-white/10 backdrop-blur-md rounded-full flex items-center justify-center text-white border border-white/20 hover:bg-white hover:text-slate-900 transition-all opacity-0 group-hover:opacity-100 z-10"
@@ -99,8 +96,49 @@ export default function DashboardSection() {
           </button>
         </div>
 
-        {/* 2. PENJELASAN LUXESTAY */}
-        <div className="grid md:grid-cols-12 gap-8 items-start mb-20">
+        {/* 🛠️ 2. DATA STATISTIK BERJALAN (DIPINDAHKAN KE ATAS PENJELASAN) */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+          
+          {/* Kotak Rating */}
+          <div className="flex items-center gap-4 bg-slate-50 p-5 rounded-2xl border border-slate-100/80 shadow-xs">
+            <div className="w-10 h-10 bg-amber-50 text-amber-500 rounded-xl flex items-center justify-center text-lg">
+              <FiStar className="fill-amber-500" />
+            </div>
+            <div>
+              <h4 className="text-xl font-black text-slate-900 tracking-tight">{rating.toFixed(1)} / 5.0</h4>
+              <p className="text-[11px] text-slate-400 font-semibold mt-0.5 uppercase tracking-wider">Rating Kepuasan Tamu</p>
+            </div>
+          </div>
+
+          {/* Kotak Total Bookings */}
+          <div className="flex items-center gap-4 bg-slate-50 p-5 rounded-2xl border border-slate-100/80 shadow-xs">
+            <div className="w-10 h-10 bg-indigo-50 text-[#5B5FEF] rounded-xl flex items-center justify-center text-lg">
+              <FiTrendingUp />
+            </div>
+            <div>
+              <h4 className="text-xl font-black text-slate-900 tracking-tight">{bookings}k+ Bookings</h4>
+              <p className="text-[11px] text-slate-400 font-semibold mt-0.5 uppercase tracking-wider">Malam Terverifikasi</p>
+            </div>
+          </div>
+
+          {/* Kotak Sertifikasi */}
+          <div className="flex items-center gap-4 bg-slate-50 p-5 rounded-2xl border border-slate-100/80 shadow-xs">
+            <div className="w-10 h-10 bg-emerald-50 text-emerald-600 rounded-xl flex items-center justify-center text-lg">
+              <FiShield />
+            </div>
+            <div>
+              <h4 className="text-xl font-black text-slate-900 tracking-tight flex items-center gap-2">
+                <span className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></span>
+                100% Verified
+              </h4>
+              <p className="text-[11px] text-slate-400 font-semibold mt-0.5 uppercase tracking-wider">Privasi & Keamanan Data</p>
+            </div>
+          </div>
+
+        </div>
+
+        {/* 3. PENJELASAN LUXESTAY */}
+        <div className="grid md:grid-cols-12 gap-8 items-start">
           <div className="md:col-span-5">
             <span className="text-[#5B5FEF] text-xs font-bold uppercase tracking-widest bg-indigo-50 px-3 py-1 rounded-md">
               About LuxeStay
@@ -122,47 +160,6 @@ export default function DashboardSection() {
               </a>
             </div>
           </div>
-        </div>
-
-        {/* 3. DATA STATISTIK BERJALAN (DI PALING BAWAH) */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 border-t border-slate-100 pt-12">
-          
-          {/* Kotak Rating */}
-          <div className="flex items-center gap-4 bg-slate-50 p-6 rounded-2xl border border-slate-100">
-            <div className="flex text-amber-500 gap-0.5">
-              <FiStar className="fill-amber-500" size={18} />
-            </div>
-            <div>
-              <h4 className="text-2xl font-black text-slate-900 tracking-tight">{rating.toFixed(1)} / 5.0</h4>
-              <p className="text-xs text-slate-400 font-medium mt-0.5">Rating Kepuasan Tamu LuxeStay</p>
-            </div>
-          </div>
-
-          {/* Kotak Total Bookings */}
-          <div className="flex items-center gap-4 bg-slate-50 p-6 rounded-2xl border border-slate-100">
-            <div className="w-10 h-10 bg-indigo-50 text-[#5B5FEF] rounded-xl flex items-center justify-center text-xl">
-              <FiTrendingUp />
-            </div>
-            <div>
-              <h4 className="text-2xl font-black text-slate-900 tracking-tight">{bookings}k+ Bookings</h4>
-              <p className="text-xs text-slate-400 font-medium mt-0.5">Malam Menginap Terverifikasi</p>
-            </div>
-          </div>
-
-          {/* Kotak Sertifikasi */}
-          <div className="flex items-center gap-4 bg-slate-50 p-6 rounded-2xl border border-slate-100">
-            <div className="w-10 h-10 bg-emerald-50 text-emerald-600 rounded-xl flex items-center justify-center text-xl">
-              <FiShield />
-            </div>
-            <div>
-              <h4 className="text-2xl font-black text-slate-900 tracking-tight flex items-center gap-2">
-                <span className="w-2.5 h-2.5 bg-emerald-500 rounded-full animate-pulse"></span>
-                100% Verified
-              </h4>
-              <p className="text-xs text-slate-400 font-medium mt-0.5">Keamanan Data & Privasi Terjamin</p>
-            </div>
-          </div>
-
         </div>
 
       </div>

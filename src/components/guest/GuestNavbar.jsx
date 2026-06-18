@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { FiGrid, FiActivity, FiMapPin, FiUsers, FiMessageSquare, FiChevronRight, FiMenu, FiX } from "react-icons/fi";
-import { useLocation, useNavigate } from "react-router-dom"; // Tambahkan ini untuk deteksi rute
+import { useLocation, useNavigate } from "react-router-dom"; 
 
 export default function GuestNavbar() {
   const [isOpen, setIsOpen] = useState(false);
@@ -79,7 +79,7 @@ export default function GuestNavbar() {
             <FiMapPin size={16} /> Destinations
           </a>
           <a href="#community" onClick={(e) => handleScrollToSection(e, "community")} className="flex items-center gap-1.5 hover:text-[#5B5FEF] transition-colors">
-            <FiUsers size={16} /> Community
+            <FiUsers size={16} /> Membership
           </a>
           <a href="#services" onClick={(e) => handleScrollToSection(e, "services")} className="flex items-center gap-1.5 hover:text-[#5B5FEF] transition-colors">
             <FiMessageSquare size={16} /> Pusat Layanan

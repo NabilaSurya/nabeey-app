@@ -73,7 +73,7 @@ export default function MemberSection() {
             to="/MemberLanding" 
             className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-[#5B5FEF] hover:bg-[#4834D4] text-white px-8 py-4 rounded-2xl font-bold transition-all shadow-lg group"
           >
-            Enter Community Hub
+            Enter Member Hub
             <FiArrowRight className="transform group-hover:translate-x-1 transition-transform" />
           </Link>
         </div>

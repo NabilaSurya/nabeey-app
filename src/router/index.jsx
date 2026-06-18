@@ -9,7 +9,7 @@ import AuthLayout from "../layouts/AuthLayout";
 // Pages (Lazy Loaded)
 const Home = lazy(() => import("../pages/Home"));
 const Rooms = lazy(() => import("../pages/Rooms"));
-const About = lazy(() => import("../pages/About"));
+const Pengaduan = lazy(() => import("../pages/Pengaduan"));
 const Login = lazy(() => import("../pages/Login"));
 const Register = lazy(() => import("../pages/Register"));
 const Customers = lazy(() => import("../pages/Customers"));
@@ -49,8 +49,8 @@ const router = createBrowserRouter([
         element: <Rooms />,
       },
       {
-        path: "about",
-        element: <About />,
+        path: "pengaduan",
+        element: <Pengaduan />,
       },
       {
         path: "customers",
