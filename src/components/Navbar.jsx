@@ -13,8 +13,8 @@ export default function Navbar() {
       return "Our Rooms";
     } else if (path.endsWith("/customers")) {
       return "Customers";
-    } else if (path.endsWith("/about") || path.endsWith("/about-us")) {
-      return "About Us";
+    } else if (path.endsWith("/pengaduan") || path.endsWith("/pengaduan")) {
+      return "Pengaduan";
     } else if (path.endsWith("/member")) {
       return "Member";
     } else if (path.endsWith("/settings")) {
