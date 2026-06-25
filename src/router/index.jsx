@@ -14,6 +14,7 @@ const Login = lazy(() => import("../pages/Login"));
 const Register = lazy(() => import("../pages/Register"));
 const Customers = lazy(() => import("../pages/Customers"));
 const Settings = lazy(() => import("../pages/Settings"));
+const User = lazy(() => import("../pages/User"));
 
 // Halaman-halaman Mandiri (BEBAS SIDEBAR)
 const Member = lazy(() => import("../pages/Member")); // Ini untuk Admin/Dashboard utama member sebelumnya
@@ -63,6 +64,10 @@ const router = createBrowserRouter([
       {
         path: "member",
         element: <Member />,
+      },
+      {
+        path: "user",
+        element: <User />,
       },
       {
         path: "*",

@@ -8,6 +8,7 @@ import {
   FiBox 
 } from "react-icons/fi";
 import { Link, useLocation, useNavigate } from "react-router-dom";
+import { FiUser } from "react-icons/fi";
 
 export default function Sidebar() {
   const location = useLocation();
@@ -20,6 +21,7 @@ export default function Sidebar() {
     { to: "/admin/customers", icon: <FiUsers />, label: "Customers" },
     { to: "/admin/pengaduan", icon: <FiInfo />, label: "Pengaduan" },
     { to: "/admin/member", icon: <FiUsers />, label: "Member" },
+     { to: "/admin/user", icon: <FiUser />, label: "User" },
     { to: "/admin/settings", icon: <FiSettings />, label: "Settings" },
   ];
 

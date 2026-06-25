@@ -1,6 +1,7 @@
 import { Link, useNavigate } from "react-router-dom";
 import { useState, useEffect, useRef } from "react";
 import { FiMail, FiLock, FiArrowRight } from "react-icons/fi";
+import { supabase } from "../lib/supabase";
 
 export default function Login() {
   const navigate = useNavigate();
@@ -17,18 +18,33 @@ export default function Login() {
     emailRef.current.focus();
   }, []);
 
-  const handleLogin = (e) => {
-    e.preventDefault();
+  const handleLogin = async (e) => {
+  e.preventDefault();
 
-    // Validasi Sederhana
-    if (email === "admin@gmail.com" && password === "123456") {
-      localStorage.setItem("token", "luxstay_secret_token_123");
-      alert("Login Berhasil! Selamat Datang.");
-      navigate("/");
-    } else {
-      alert("Email atau password salah! (admin@gmail.com / 123456)");
-    }
-  };
+  const { data, error } =
+    await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+
+  if (error) {
+    alert(error.message);
+    return;
+  }
+
+  localStorage.setItem(
+    "token",
+    data.session.access_token
+  );
+  localStorage.setItem(
+  "user",
+  JSON.stringify(data.user)
+);
+
+
+  alert("Login Berhasil!");
+  navigate("/admin");
+};
 
   return (
     <div className="bg-white p-10 md:p-14 rounded-[3.5rem] shadow-[0_20px_60px_rgba(91,95,239,0.1)] border border-[#F5F5F7] animate-in fade-in zoom-in duration-700 font-['Inter',_sans-serif] w-full max-w-[500px]">
