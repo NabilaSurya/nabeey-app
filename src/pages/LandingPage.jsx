@@ -1,6 +1,5 @@
-import { FiCheck, FiRefreshCw } from "react-icons/fi";
-import { useNavigate } from "react-router-dom";
-import { AuthProvider, useAuth } from "../context/AuthContext";
+import { FiCheck } from "react-icons/fi";
+import { AuthProvider } from "../context/AuthContext";
 import LandingNavbar from "../components/landing/LandingNavbar";
 import HeroSection from "../components/landing/HeroSection";
 import KatalogSection from "../components/landing/KatalogSection";
@@ -16,42 +15,8 @@ export default function LandingPage() {
 }
 
 function LandingPageContent() {
-  const navigate = useNavigate();
-  const { user, switchRole } = useAuth();
-
-  const handleRoleChange = (newRole) => {
-    switchRole(newRole);
-    if (newRole === "member") {
-      navigate("/MemberLanding");
-    } else if (newRole === "admin") {
-      navigate("/admin");
-    } else {
-      navigate("/");
-    }
-  };
-
   return (
     <div className="w-full min-h-screen bg-white antialiased selection:bg-[#5B5FEF]/20 selection:text-[#5B5FEF] scroll-smooth">
-      {/* Floating Role Switcher — untuk testing */}
-      <div className="fixed bottom-6 right-6 z-[999] flex items-center gap-2 bg-white/95 backdrop-blur-md border border-gray-200 shadow-xl rounded-2xl px-4 py-3">
-        <div className="flex items-center gap-1.5">
-          <FiRefreshCw size={12} className="text-gray-400" />
-          <span className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Role:</span>
-        </div>
-        <select
-          value={user.role}
-          onChange={(e) => handleRoleChange(e.target.value)}
-          className="text-xs font-bold bg-gray-50 border border-gray-200 rounded-lg px-2.5 py-1.5 text-gray-800 outline-none focus:border-[#5B5FEF] cursor-pointer"
-        >
-          <option value="guest">👤 Guest</option>
-          <option value="member">⭐ Member</option>
-          <option value="admin">🛡️ Admin</option>
-        </select>
-        <div className={`w-2 h-2 rounded-full ${
-          user.role === "guest" ? "bg-gray-400" :
-          user.role === "member" ? "bg-amber-400" : "bg-[#5B5FEF]"
-        }`} />
-      </div>
       {/* Navbar */}
       <LandingNavbar />
 

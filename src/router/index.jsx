@@ -17,6 +17,7 @@ const Settings = lazy(() => import("../pages/Settings"));
 const User = lazy(() => import("../pages/User"));
 
 // Halaman-halaman Mandiri (BEBAS SIDEBAR)
+const GuestPage = lazy(() => import("../pages/guest/GuestPage"));
 const Member = lazy(() => import("../pages/Member")); // Ini untuk Admin/Dashboard utama member sebelumnya
 const MemberLanding = lazy(() => import("../pages/member/MemberLanding")); // Halaman Baru untuk Portal Member Biasa
 const LandingPage = lazy(() => import("../pages/LandingPage"));
@@ -76,6 +77,14 @@ const router = createBrowserRouter([
     ],
   },
   {
+    path: "/guest",
+    element: (
+      <Suspense fallback={<Loading />}>
+        <GuestPage />
+      </Suspense>
+    ),
+  },
+  {
     // SEJAJAR DI SINI: Bebas dari jeratan sidebar MainLayout!
     path: "/",
     element: (
@@ -84,14 +93,14 @@ const router = createBrowserRouter([
       </Suspense>
     ),
   },
-      {
-        // Rute khusus user/customer member biasa -> /member/MemberLanding
-        path: "MemberLanding",
-        element: (
-          <Suspense fallback={<Loading />}>
-            <MemberLanding />
-          </Suspense>
-        ),
+  {
+    // Rute khusus user/customer member biasa -> /member/MemberLanding
+    path: "MemberLanding",
+    element: (
+      <Suspense fallback={<Loading />}>
+        <MemberLanding />
+      </Suspense>
+    ),
   },
   {
     path: "/auth",

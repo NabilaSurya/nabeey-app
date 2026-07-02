@@ -19,32 +19,45 @@ export default function Login() {
   }, []);
 
   const handleLogin = async (e) => {
-  e.preventDefault();
+    e.preventDefault();
 
-  const { data, error } =
-    await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
+    const { data, error } =
+      await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
 
-  if (error) {
-    alert(error.message);
-    return;
-  }
+    if (error) {
+      alert(error.message);
+      return;
+    }
 
-  localStorage.setItem(
-    "token",
-    data.session.access_token
-  );
-  localStorage.setItem(
-  "user",
-  JSON.stringify(data.user)
-);
+    localStorage.setItem(
+      "token",
+      data.session.access_token
+    );
+    localStorage.setItem(
+      "user",
+      JSON.stringify(data.user)
+    );
 
+    // Fetch role dari tabel profiles untuk menentukan redirect
+    const { data: profile, error: profileError } = await supabase
+      .from("profiles")
+      .select("role")
+      .eq("id", data.user.id)
+      .maybeSingle();
 
-  alert("Login Berhasil!");
-  navigate("/admin");
-};
+    const userRole = (!profileError && profile?.role) || "member";
+
+    alert("Login Berhasil!");
+
+    if (userRole === "admin") {
+      navigate("/admin");
+    } else {
+      navigate("/MemberLanding");
+    }
+  };
 
   return (
     <div className="bg-white p-10 md:p-14 rounded-[3.5rem] shadow-[0_20px_60px_rgba(91,95,239,0.1)] border border-[#F5F5F7] animate-in fade-in zoom-in duration-700 font-['Inter',_sans-serif] w-full max-w-[500px]">

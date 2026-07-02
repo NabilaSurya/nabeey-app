@@ -34,7 +34,7 @@ function isExternalLink(href) {
 }
 
 export default function LandingNavbar() {
-  const { user, isGuest, isMember, isAdmin, logout } = useAuth();
+  const { user, isGuest, isMember, isAdmin, signOut } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
 
@@ -56,8 +56,8 @@ export default function LandingNavbar() {
     }
   };
 
-  const handleLogout = () => {
-    logout();
+  const handleLogout = async () => {
+    await signOut();
     setIsOpen(false);
   };
 
@@ -132,7 +132,7 @@ export default function LandingNavbar() {
               </span>
               {/* Points Badge */}
               <span className="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-bold bg-indigo-50 text-[#5B5FEF] border border-indigo-100 rounded-full">
-                {user.points.toLocaleString()} Pts
+                {user?.points?.toLocaleString() ?? '0'} Pts
               </span>
 
               {/* Sheet Dropdown untuk menu Member */}
@@ -159,7 +159,7 @@ export default function LandingNavbar() {
                           {user.name}
                         </SheetTitle>
                         <SheetDescription className="text-xs text-gray-500">
-                          {user.tier} Member • {user.points.toLocaleString()} Pts
+                          {user.tier} Member • {user?.points?.toLocaleString() ?? '0'} Pts
                         </SheetDescription>
                       </div>
                     </div>

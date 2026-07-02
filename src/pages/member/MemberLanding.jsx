@@ -1,18 +1,24 @@
 import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 import { 
   FiGrid, FiActivity, FiMapPin, FiUsers, FiMessageSquare, 
   FiChevronRight, FiMenu, FiX, FiCheckCircle, FiUser, FiMail, 
   FiGift, FiCreditCard, FiAward, FiLogOut, FiHome, FiSliders, FiPhone,
-  FiSearch, FiFilter, FiInfo
+  FiSearch, FiFilter, FiInfo, FiStar
 } from "react-icons/fi";
+import { AuthProvider, useAuth } from "../../context/AuthContext";
 
 export default function Member() {
-  // Authentication & Subscription States
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [isSubscribed, setIsSubscribed] = useState(false);
-  const [inputName, setInputName] = useState("");
-  const [inputEmail, setInputEmail] = useState("");
-  
+  return (
+    <AuthProvider>
+      <MemberContent />
+    </AuthProvider>
+  );
+}
+
+function MemberContent() {
+  const { user, isGuest, isMember, signOut } = useAuth();
+
   // Navbar States
   const [isOpen, setIsOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
@@ -25,14 +31,28 @@ export default function Member() {
 
   // Dynamic Member Data
   const [member, setMember] = useState({
-    name: "Guest User",
-    email: "guest@luxstay.com",
+    name: "Member",
+    email: "",
     phone: "+62 812-3456-7890",
     status: "Gold Member",
-    points: 1850,
+    points: 0,
     totalBooking: 3,
     preferredRoom: "Luxury Ocean Suite Villa"
   });
+
+  // Sync data from AuthContext when user is member
+  useEffect(() => {
+    if (isMember) {
+      setMember(prev => ({
+        ...prev,
+        name: user.name || "Member",
+        email: user.email || "",
+        points: user.points || 0,
+      }));
+      setEditName(user.name || "");
+      setEditEmail(user.email || "");
+    }
+  }, [isMember, user]);
 
   // Filter & Search States untuk Tabel Pesanan
   const [searchQuery, setSearchQuery] = useState("");
@@ -74,37 +94,8 @@ export default function Member() {
     setTimeout(() => setToast({ show: false, message: "", type: "success" }), 4000);
   };
 
-  const handleLogin = (e) => {
-    e.preventDefault();
-    if (!inputName.trim()) return;
-    
-    const formattedEmail = inputEmail || `${inputName.toLowerCase().replace(/\s+/g, "")}@luxstay.com`;
-    setMember((prev) => ({
-      ...prev,
-      name: inputName,
-      email: formattedEmail,
-    }));
-    
-    setEditName(inputName);
-    setEditEmail(formattedEmail);
-    setEditPhone(member.phone);
-    setEditRoom(member.preferredRoom);
-    
-    setIsLoggedIn(true);
-    showNotification(`Selamat datang kembali, ${inputName}! Silakan verifikasi paket Anda.`, "success");
-  };
-
-  const handleActivateSubscription = () => {
-    setIsSubscribed(true);
-    setActiveView("home");
-    showNotification("Keanggotaan Gold Privilege Anda telah aktif!", "success");
-  };
-
-  const handleSignOut = () => {
-    setIsLoggedIn(false);
-    setIsSubscribed(false);
-    setInputName("");
-    setInputEmail("");
+  const handleSignOut = async () => {
+    await signOut();
     setActiveView("home");
     showNotification("Anda telah keluar dari akun.", "info");
   };
@@ -166,9 +157,9 @@ export default function Member() {
       )}
 
       {/* ==================================================================
-        1. DYNAMIC MEMBER NAVBAR (Hanya muncul jika SUDAH LOGIN)
+        1. MEMBER NAVBAR (Hanya muncul jika sudah login)
         ================================================================== */}
-      {isLoggedIn && (
+      {isMember && (
         <nav className={`fixed top-0 left-0 w-full z-40 transition-all duration-300 ${
           isScrolled 
             ? "bg-white/95 backdrop-blur-md shadow-md py-4 border-b border-slate-200/60" 
@@ -182,67 +173,54 @@ export default function Member() {
                 Luxe<span className="text-[#5B5FEF]">Stay</span>
               </span>
               <span className="text-[9px] font-extrabold bg-[#5B5FEF]/10 text-[#5B5FEF] px-2 py-0.5 rounded-full uppercase tracking-widest">
-                {!isSubscribed ? "PENDING" : "MEMBER"}
+                MEMBER
               </span>
             </div>
 
             {/* NAVIGATION LINKS */}
             <div className="hidden md:flex gap-6 text-sm font-bold text-slate-600">
-              {isSubscribed && (
-                <>
-                  <button 
-                    onClick={() => setActiveView("home")} 
-                    className={`flex items-center gap-1.5 transition-colors ${activeView === "home" ? "text-[#5B5FEF]" : "hover:text-[#5B5FEF]"}`}
-                  >
-                    <FiHome size={16} /> Home Dashboard
-                  </button>
-                  <button 
-                    onClick={() => setActiveView("rewards")} 
-                    className={`flex items-center gap-1.5 transition-colors ${activeView === "rewards" ? "text-[#5B5FEF]" : "hover:text-[#5B5FEF]"}`}
-                  >
-                    <FiGift size={16} /> Tukar Rewards
-                  </button>
-                  <button 
-                    onClick={() => setActiveView("profile")} 
-                    className={`flex items-center gap-1.5 transition-colors ${activeView === "profile" ? "text-[#5B5FEF]" : "hover:text-[#5B5FEF]"}`}
-                  >
-                    <FiUser size={16} /> Edit Profil
-                  </button>
-                </>
-              )}
+              <button 
+                onClick={() => setActiveView("home")} 
+                className={`flex items-center gap-1.5 transition-colors ${activeView === "home" ? "text-[#5B5FEF]" : "hover:text-[#5B5FEF]"}`}
+              >
+                <FiHome size={16} /> Home Dashboard
+              </button>
+              <button 
+                onClick={() => setActiveView("rewards")} 
+                className={`flex items-center gap-1.5 transition-colors ${activeView === "rewards" ? "text-[#5B5FEF]" : "hover:text-[#5B5FEF]"}`}
+              >
+                <FiGift size={16} /> Tukar Rewards
+              </button>
+              <button 
+                onClick={() => setActiveView("profile")} 
+                className={`flex items-center gap-1.5 transition-colors ${activeView === "profile" ? "text-[#5B5FEF]" : "hover:text-[#5B5FEF]"}`}
+              >
+                <FiUser size={16} /> Edit Profil
+              </button>
             </div>
 
             {/* PROFILE WIDGET & SIGN OUT */}
             <div className="hidden md:flex items-center gap-4">
-              {isSubscribed ? (
-                <div className="flex items-center gap-3 bg-slate-100 px-3 py-1.5 rounded-xl border border-slate-200">
-                  <div 
-                    onClick={() => setActiveView("profile")} 
-                    className="w-8 h-8 rounded-lg bg-[#5B5FEF] text-white font-black flex items-center justify-center text-xs cursor-pointer hover:scale-105 transition-transform"
-                    title="Edit Profil"
-                  >
-                    {member.name.charAt(0).toUpperCase()}
-                  </div>
-                  <div className="text-left">
-                    <p className="text-[11px] font-bold text-slate-900 leading-none">{member.name}</p>
-                    <p className="text-[9px] font-black text-amber-700 mt-1">{member.points.toLocaleString()} PTS</p>
-                  </div>
-                  <button 
-                    onClick={handleSignOut} 
-                    className="ml-2 p-1 text-slate-400 hover:text-rose-600 transition-colors"
-                    title="Sign Out"
-                  >
-                    <FiLogOut size={16} />
-                  </button>
+              <div className="flex items-center gap-3 bg-slate-100 px-3 py-1.5 rounded-xl border border-slate-200">
+                <div 
+                  onClick={() => setActiveView("profile")} 
+                  className="w-8 h-8 rounded-lg bg-[#5B5FEF] text-white font-black flex items-center justify-center text-xs cursor-pointer hover:scale-105 transition-transform"
+                  title="Edit Profil"
+                >
+                  {member.name.charAt(0).toUpperCase()}
                 </div>
-              ) : (
+                <div className="text-left">
+                  <p className="text-[11px] font-bold text-slate-900 leading-none">{member.name}</p>
+                  <p className="text-[9px] font-black text-amber-700 mt-1">{member.points.toLocaleString()} PTS</p>
+                </div>
                 <button 
                   onClick={handleSignOut} 
-                  className="bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold px-4 py-2 rounded-xl transition shadow-md flex items-center gap-1"
+                  className="ml-2 p-1 text-slate-400 hover:text-rose-600 transition-colors"
+                  title="Sign Out"
                 >
-                  <FiLogOut size={14} /> Keluar
+                  <FiLogOut size={16} />
                 </button>
-              )}
+              </div>
             </div>
 
             {/* MOBILE TOGGLE */}
@@ -256,16 +234,10 @@ export default function Member() {
           {/* MOBILE DROPDOWN */}
           <div className={`md:hidden absolute top-full left-0 w-full bg-white border-b border-slate-200 shadow-xl transition-all duration-300 ${isOpen ? "opacity-100 translate-y-0 visible" : "opacity-0 -translate-y-4 invisible"}`}>
             <div className="flex flex-col px-6 py-6 gap-4 text-sm font-bold text-slate-600">
-              {isSubscribed ? (
-                <>
-                  <button onClick={() => { setActiveView("home"); setIsOpen(false); }} className="flex items-center gap-3 py-2 border-b border-slate-100 text-slate-900"><FiHome size={18} /> Home Dashboard</button>
-                  <button onClick={() => { setActiveView("rewards"); setIsOpen(false); }} className="flex items-center gap-3 py-2 border-b border-slate-100 text-slate-900"><FiGift size={18} /> Tukar Rewards</button>
-                  <button onClick={() => { setActiveView("profile"); setIsOpen(false); }} className="flex items-center gap-3 py-2 border-b border-slate-100 text-slate-900"><FiUser size={18} /> Edit Profil</button>
-                  <button onClick={() => { handleSignOut(); setIsOpen(false); }} className="w-full mt-2 text-center bg-rose-600 text-white text-xs font-bold py-3.5 rounded-xl block">Sign Out</button>
-                </>
-              ) : (
-                <button onClick={() => { handleSignOut(); setIsOpen(false); }} className="w-full text-center bg-rose-600 text-white text-xs font-bold py-3.5 rounded-xl block">Keluar</button>
-              )}
+              <button onClick={() => { setActiveView("home"); setIsOpen(false); }} className="flex items-center gap-3 py-2 border-b border-slate-100 text-slate-900"><FiHome size={18} /> Home Dashboard</button>
+              <button onClick={() => { setActiveView("rewards"); setIsOpen(false); }} className="flex items-center gap-3 py-2 border-b border-slate-100 text-slate-900"><FiGift size={18} /> Tukar Rewards</button>
+              <button onClick={() => { setActiveView("profile"); setIsOpen(false); }} className="flex items-center gap-3 py-2 border-b border-slate-100 text-slate-900"><FiUser size={18} /> Edit Profil</button>
+              <button onClick={() => { handleSignOut(); setIsOpen(false); }} className="w-full mt-2 text-center bg-rose-600 text-white text-xs font-bold py-3.5 rounded-xl block">Sign Out</button>
             </div>
           </div>
         </nav>
@@ -274,112 +246,84 @@ export default function Member() {
       {/* ==================================================================
         2. MAIN CONTENT AREA 
         ================================================================== */}
-      <div className={`${isLoggedIn ? "pt-32" : "pt-12"} pb-24 max-w-7xl mx-auto px-6 md:px-8 w-full`}>
+      <div className={`${isMember ? "pt-32" : "pt-12"} pb-24 max-w-7xl mx-auto px-6 md:px-8 w-full`}>
         
-        {/* KONDISI 1: BELUM LOGIN (Tanpa Navbar Atas) */}
-        {!isLoggedIn && (
+        {/* KONDISI 1: GUEST — Lihat halaman harga member */}
+        {isGuest && (
           <div className="min-h-[85vh] flex items-center justify-center py-12">
-            <div className="w-full max-w-md bg-white rounded-[24px] border border-slate-200 shadow-xl p-8 transition-all">
-              <div className="text-center mb-8">
-                <span className="text-[#5B5FEF] text-[10px] font-black uppercase tracking-widest bg-[#5B5FEF]/10 px-3 py-1.5 rounded-lg">
-                  LuxeStay Exclusive Portal
+            <div className="w-full max-w-3xl">
+              <div className="text-center mb-12">
+                <span className="inline-block text-[#5B5FEF] text-xs font-bold uppercase tracking-widest bg-[#5B5FEF]/10 px-4 py-1.5 rounded-full mb-4">
+                  Membership Premium
                 </span>
-                <h2 className="text-2xl font-black text-slate-900 mt-4 tracking-tight">Unlock Member Portal</h2>
-                <p className="text-xs text-slate-500 mt-1">Silakan masuk dengan akun Anda untuk mengelola poin rewards & akomodasi.</p>
+                <h1 className="text-4xl md:text-5xl font-black text-slate-900 tracking-tight mt-4">
+                  Jadi Member LuxStay
+                </h1>
+                <p className="text-sm text-slate-500 mt-3 max-w-xl mx-auto">
+                  Dapatkan akses eksklusif ke diskon kamar spesial, penukaran poin reward, dan layanan prioritas.
+                </p>
               </div>
 
-              <form onSubmit={handleLogin} className="space-y-5">
-                <div>
-                  <label className="block text-[10px] font-black text-slate-500 uppercase tracking-wider mb-2">Nama Lengkap</label>
-                  <div className="relative">
-                    <FiUser className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
-                    <input 
-                      type="text"
-                      required
-                      placeholder="Masukkan nama Anda..."
-                      value={inputName}
-                      onChange={(e) => setInputName(e.target.value)}
-                      className="w-full pl-11 pr-4 py-3.5 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:outline-none focus:border-[#5B5FEF] focus:bg-white transition-all text-slate-900 font-bold"
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-[10px] font-black text-slate-400 uppercase tracking-wider mb-2">Alamat Email</label>
-                  <div className="relative">
-                    <FiMail className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
-                    <input 
-                      type="email"
-                      placeholder="name@luxstay.com"
-                      value={inputEmail}
-                      onChange={(e) => setInputEmail(e.target.value)}
-                      className="w-full pl-11 pr-4 py-3.5 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:outline-none focus:border-[#5B5FEF] focus:bg-white transition-all text-slate-900 font-bold"
-                    />
-                  </div>
-                </div>
-
-                <button 
-                  type="submit"
-                  className="w-full bg-[#5B5FEF] hover:bg-[#4834D4] text-white font-bold text-xs py-4 rounded-xl transition duration-200 shadow-md transform hover:-translate-y-0.5"
-                >
-                  Continue to Verification
-                </button>
-              </form>
-            </div>
-          </div>
-        )}
-
-        {/* KONDISI 2: LOGIN TAPI BELUM BERLANGGANAN */}
-        {isLoggedIn && !isSubscribed && (
-          <div className="min-h-[65vh] flex items-center justify-center py-6">
-            <div className="w-full max-w-xl bg-white rounded-[32px] border border-slate-200 shadow-sm p-8 md:p-10 text-center">
-              <span className="inline-flex items-center gap-1.5 text-amber-800 text-[10px] font-black uppercase tracking-widest bg-amber-500/10 px-3 py-1.5 rounded-lg">
-                <FiAward size={12} /> Subscription Plan Required
-              </span>
-              <h2 className="text-3xl font-black text-slate-900 mt-4 tracking-tight">Halo, {member.name}! 👋</h2>
-              <p className="text-xs text-slate-500 mt-1 max-w-sm mx-auto">Akun terdaftar, namun Anda memerlukan langganan paket **Gold Tier active** untuk mengakses dashboard reward & pesanan.</p>
-
-              <div className="my-8 p-6 rounded-2xl border-2 border-[#5B5FEF] bg-slate-50 text-left relative overflow-hidden">
-                <div className="absolute top-0 right-0 bg-[#5B5FEF] text-white font-black text-[9px] px-4 py-1 rounded-bl-xl tracking-wider">RECOMMENDED</div>
-                <h3 className="text-base font-black text-slate-900">LuxeStay Gold Privilege</h3>
-                <p className="text-xs text-slate-500 mt-1">Akses eksklusif penuh ke layanan hospitality resort kami.</p>
-                
-                <div className="my-4 border-t border-slate-200 pt-4 space-y-2.5">
-                  {["Diskon Kamar Flat 15% untuk Semua Ruangan", "Fasilitas Penukaran Poin dengan Kamar Gratis", "Prioritas Jalur Check-In Tanpa Antre"].map((benefit, i) => (
-                    <div key={i} className="flex items-center gap-2 text-xs font-bold text-slate-800">
-                      <span className="text-[#5B5FEF]">✔</span> {benefit}
+              <div className="grid md:grid-cols-3 gap-6 mb-12">
+                {[
+                  {
+                    icon: <FiStar className="text-amber-500" size={28} />,
+                    title: "Diskon Eksklusif",
+                    desc: "Nikmati potongan harga hingga 20% untuk setiap pemesanan kamar.",
+                  },
+                  {
+                    icon: <FiGift className="text-[#5B5FEF]" size={28} />,
+                    title: "Poin Reward",
+                    desc: "Kumpulkan poin dari setiap transaksi dan tukarkan dengan hadiah menarik.",
+                  },
+                  {
+                    icon: <FiAward className="text-emerald-500" size={28} />,
+                    title: "Layanan Prioritas",
+                    desc: "Check-in ekspres, butler service, dan akses ke executive lounge.",
+                  },
+                ].map((item, i) => (
+                  <div key={i} className="bg-white rounded-2xl border border-slate-200 p-6 text-center hover:shadow-lg transition-shadow">
+                    <div className="w-14 h-14 bg-slate-50 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                      {item.icon}
                     </div>
+                    <h3 className="text-sm font-black text-slate-900 mb-2">{item.title}</h3>
+                    <p className="text-xs text-slate-500 leading-relaxed">{item.desc}</p>
+                  </div>
+                ))}
+              </div>
+
+              <div className="bg-white border-2 border-[#5B5FEF] rounded-3xl p-8 md:p-10 max-w-lg mx-auto text-center shadow-xl">
+                <span className="bg-[#5B5FEF]/10 text-[#5B5FEF] text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-widest">
+                  GRATIS DAFTAR
+                </span>
+                <h3 className="text-xl font-black text-slate-900 mt-4">Daftar Sekarang</h3>
+                <p className="text-xs text-slate-500 mt-2">Buat akun LuxStay dan nikmati semua keuntungan member secara instan.</p>
+                <div className="flex justify-center gap-2 mt-2 mb-6">
+                  {["No hidden fees", "Instant access", "Cancel anytime"].map((tag) => (
+                    <span key={tag} className="text-[10px] bg-emerald-50 text-emerald-700 font-bold px-2 py-1 rounded-full">
+                      {tag}
+                    </span>
                   ))}
                 </div>
-
-                <div className="flex justify-between items-end mt-6 pt-2 border-t border-slate-200">
-                  <div>
-                    <span className="text-[10px] block font-black text-slate-400 uppercase tracking-wider">Biaya Keanggotaan</span>
-                    <span className="text-2xl font-black text-slate-900">$19<span className="text-xs text-slate-500 font-bold">/bulan</span></span>
-                  </div>
-                </div>
-              </div>
-
-              <div className="flex flex-col gap-3">
-                <button 
-                  onClick={handleActivateSubscription}
-                  className="w-full bg-[#5B5FEF] hover:bg-[#4834D4] text-white font-bold text-xs py-4 rounded-xl transition duration-200 shadow-md flex items-center justify-center gap-2 transform hover:-translate-y-0.5"
+                <Link
+                  to="/auth/register"
+                  className="inline-flex items-center gap-2 bg-[#5B5FEF] hover:bg-[#4834D4] text-white font-bold text-sm py-4 px-10 rounded-xl transition-all shadow-lg transform hover:-translate-y-0.5"
                 >
-                  <FiCreditCard size={14} /> Aktifkan Keanggotaan Sekarang
-                </button>
-                <button 
-                  onClick={handleActivateSubscription}
-                  className="text-xs font-bold text-slate-500 hover:text-rose-600 transition-colors py-1"
-                >
-                  Skip Dulu
-                </button>
+                  <FiUser size={16} /> Daftar Member Sekarang
+                </Link>
+                <p className="text-xs text-slate-400 mt-4">
+                  Sudah punya akun?{' '}
+                  <Link to="/auth/login" className="text-[#5B5FEF] font-bold hover:underline">
+                    Masuk
+                  </Link>
+                </p>
               </div>
             </div>
           </div>
         )}
 
-        {/* KONDISI 3: SUDAH MASUK & AKTIF BERLANGGANAN (DASHBOARD UTUH) */}
-        {isLoggedIn && isSubscribed && (
+        {/* KONDISI 2: MEMBER — Dashboard */}
+        {isMember && (
           <div className="space-y-12">
             
             {/* VIEW A: HOME DASHBOARD */}

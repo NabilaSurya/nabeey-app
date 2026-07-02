@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
   FiStar,
@@ -18,83 +18,131 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import { supabase } from "../../lib/supabase";
 import { useAuth } from "../../context/AuthContext";
+import LoadingSpinner from "../LoadingSpinner";
 
-// --- Mock Data Kamar Hotel (existing data unchanged) ---
-const roomsData = [
+// --- Mock Data (fallback jika Supabase belum siap) ---
+const fallbackRoomsData = [
   {
     id: "RM-001", title: "Deluxe Ocean View", category: "Deluxe",
     location: "Lantai 3-5, Gedung Utama",
     image: "https://images.unsplash.com/photo-1578683010236-d716f9a3f461?q=80&w=2070&auto=format&fit=crop",
-    rating: 4.8, reviews: 124, price: 1200000, capacity: 2, size: "32 m²", bed: "King Size Bed",
-    description: "Kamar Deluxe dengan pemandangan laut yang menakjubkan. Dilengkapi dengan balkon pribadi, TV layar datar 50 inci, dan kamar mandi marmer dengan bathtub.",
+    rating: 4.8, reviews: 124, price: 1200000, capacity: 2, size: "32 m\u00B2", bed: "King Size Bed",
+    description: "Kamar Deluxe dengan pemandangan laut yang menakjubkan.",
     facilities: ["AC & Pemanas", "Wi-Fi 100 Mbps", "TV Layar Datar 50\"", "Mini Bar", "Bathtub Marmer", "Balkon Pribadi"],
+    status: "Tersedia",
   },
   {
     id: "RM-002", title: "Executive Suite", category: "Suite",
     location: "Lantai 8-10, Executive Wing",
     image: "https://images.unsplash.com/photo-1631049307264-da0ec9d70304?q=80&w=2070&auto=format&fit=crop",
-    rating: 4.9, reviews: 89, price: 2500000, capacity: 3, size: "48 m²", bed: "Super King Size Bed",
-    description: "Suite eksekutif dengan ruang tamu terpisah, akses ke Executive Lounge, dan pemandangan kota yang spektakuler. Termasuk butler service 24 jam.",
+    rating: 4.9, reviews: 89, price: 2500000, capacity: 3, size: "48 m\u00B2", bed: "Super King Size Bed",
+    description: "Suite eksekutif dengan ruang tamu terpisah.",
     facilities: ["Ruang Tamu Terpisah", "Butler Service", "Access Executive Lounge", "Wi-Fi 200 Mbps", "Espresso Machine", "Smart TV 65\""],
+    status: "Tersedia",
   },
   {
     id: "RM-003", title: "Superior Twin", category: "Superior",
     location: "Lantai 2-4, Gedung Utama",
     image: "https://images.unsplash.com/photo-1595576508898-0ad5c879a061?q=80&w=2070&auto=format&fit=crop",
-    rating: 4.6, reviews: 203, price: 800000, capacity: 2, size: "28 m²", bed: "Twin Single Beds",
-    description: "Kamar Superior dengan dua tempat tidur single yang nyaman. Cocok untuk kolega atau teman yang bepergian bersama.",
+    rating: 4.6, reviews: 203, price: 800000, capacity: 2, size: "28 m\u00B2", bed: "Twin Single Beds",
+    description: "Kamar Superior dengan dua tempat tidur single.",
     facilities: ["AC & Pemanas", "Wi-Fi Gratis", "TV Layar Datar 40\"", "Kamar Mandi Shower", "Meja Kerja", "Coffee & Tea Maker"],
+    status: "Tersedia",
   },
   {
     id: "RM-004", title: "Presidential Penthouse", category: "Penthouse",
     location: "Lantai 20, Penthouse Floor",
     image: "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?q=80&w=2070&auto=format&fit=crop",
-    rating: 5.0, reviews: 48, price: 5500000, capacity: 4, size: "85 m²", bed: "Super King Size Bed + 2 Single",
-    description: "Penthouse mewah di lantai tertinggi dengan pemandangan 360° kota. Dilengkapi kolam renang pribadi, ruang keluarga luas, dan dapur lengkap.",
+    rating: 5.0, reviews: 48, price: 5500000, capacity: 4, size: "85 m\u00B2", bed: "Super King Size Bed + 2 Single",
+    description: "Penthouse mewah dengan pemandangan 360\u00B0 kota.",
     facilities: ["Kolam Renang Pribadi", "Ruang Keluarga", "Dapur Lengkap", "Private Chef", "Home Theater", "Terrace Luas"],
+    status: "Tersedia",
   },
   {
     id: "RM-005", title: "Family Connecting Room", category: "Deluxe",
     location: "Lantai 6, Gedung Utama",
     image: "https://images.unsplash.com/photo-1566665797739-1674de7a421a?q=80&w=2070&auto=format&fit=crop",
-    rating: 4.7, reviews: 156, price: 2200000, capacity: 5, size: "56 m²", bed: "King Size + 2 Single Beds",
-    description: "Dua kamar terhubung yang sempurna untuk keluarga.",
+    rating: 4.7, reviews: 156, price: 2200000, capacity: 5, size: "56 m\u00B2", bed: "King Size + 2 Single Beds",
+    description: "Dua kamar terhubung sempurna untuk keluarga.",
     facilities: ["2 Kamar Terhubung", "Ruang Bermain Anak", "2 Kamar Mandi", "Kulkas & Microwave", "Smart TV 2 Unit", "Wi-Fi 150 Mbps"],
+    status: "Tersedia",
   },
   {
     id: "RM-006", title: "Garden Villa", category: "Villa",
     location: "Area Taman Resort",
     image: "https://images.unsplash.com/photo-1571003123894-1f0594d2b5d9?q=80&w=2070&auto=format&fit=crop",
-    rating: 4.9, reviews: 112, price: 3500000, capacity: 4, size: "70 m²", bed: "King Size Bed + Sofa Bed",
-    description: "Villa pribadi di tengah taman tropis yang asri.",
+    rating: 4.9, reviews: 112, price: 3500000, capacity: 4, size: "70 m\u00B2", bed: "King Size Bed + Sofa Bed",
+    description: "Villa pribadi di tengah taman tropis.",
     facilities: ["Kolam Renang Pribadi", "Gazebo & Garden", "Area BBQ", "Dapur Mini", "Parkir Mobil", "Wi-Fi 200 Mbps"],
+    status: "Tersedia",
   },
   {
     id: "RM-007", title: "Standard Room", category: "Superior",
     location: "Lantai 1-2, Gedung Utama",
     image: "https://images.unsplash.com/photo-1611892440504-42a792e24d32?q=80&w=2070&auto=format&fit=crop",
-    rating: 4.5, reviews: 312, price: 550000, capacity: 2, size: "24 m²", bed: "Queen Size Bed",
+    rating: 4.5, reviews: 312, price: 550000, capacity: 2, size: "24 m\u00B2", bed: "Queen Size Bed",
     description: "Kamar standar nyaman dengan harga terjangkau.",
     facilities: ["AC", "Wi-Fi Gratis", "TV Layar Datar 32\"", "Kamar Mandi Shower", "Meja Kerja", "Safety Box"],
+    status: "Tersedia",
   },
   {
     id: "RM-008", title: "Honeymoon Suite", category: "Suite",
     location: "Lantai 12, Romantic Wing",
     image: "https://images.unsplash.com/photo-1590490360182-c33d57733427?q=80&w=2070&auto=format&fit=crop",
-    rating: 5.0, reviews: 76, price: 3200000, capacity: 2, size: "45 m²", bed: "King Size Bed + Canopy",
+    rating: 5.0, reviews: 76, price: 3200000, capacity: 2, size: "45 m\u00B2", bed: "King Size Bed + Canopy",
     description: "Suite romantis untuk momen spesial Anda.",
     facilities: ["Canopy King Bed", "Bathtub for 2", "Bunga Segar Harian", "Spa Bath Set", "Smart TV 55\"", "Private Balcony"],
+    status: "Tersedia",
   },
   {
     id: "RM-009", title: "Accessible Room", category: "Superior",
     location: "Lantai 1, Gedung Utama",
     image: "https://images.unsplash.com/photo-1584132967334-10e028bd69f7?q=80&w=2070&auto=format&fit=crop",
-    rating: 4.8, reviews: 34, price: 650000, capacity: 2, size: "30 m²", bed: "Queen Size Bed",
+    rating: 4.8, reviews: 34, price: 650000, capacity: 2, size: "30 m\u00B2", bed: "Queen Size Bed",
     description: "Kamar ramah difabel dengan akses kursi roda.",
     facilities: ["Akses Kursi Roda", "Handrail Kamar Mandi", "Tombol Darurat", "AC & Pemanas", "TV Layar Datar", "Wi-Fi Gratis"],
+    status: "Tersedia",
   },
 ];
+
+// --- Helper: map Supabase room to component format ---
+function mapRoom(room) {
+  const typeDefaults = {
+    Deluxe: { capacity: 2, size: "32 m\u00B2", bed: "King Size Bed" },
+    Suite: { capacity: 3, size: "48 m\u00B2", bed: "Super King Size Bed" },
+    Superior: { capacity: 2, size: "28 m\u00B2", bed: "Queen Size Bed" },
+    Penthouse: { capacity: 4, size: "85 m\u00B2", bed: "Super King + 2 Single" },
+    Villa: { capacity: 4, size: "70 m\u00B2", bed: "King Size + Sofa Bed" },
+  };
+  const def = typeDefaults[room.room_type] || { capacity: 2, size: "30 m\u00B2", bed: "Queen Size Bed" };
+
+  const roomTitles = {
+    Deluxe: "Deluxe Premium Room",
+    Suite: "Executive Suite",
+    Superior: "Superior Room",
+    Penthouse: "Presidential Penthouse",
+    Villa: "Garden Villa",
+  };
+
+  return {
+    id: room.room_number,
+    title: roomTitles[room.room_type] || `${room.room_type} Room`,
+    category: room.room_type,
+    location: "LuxStay Hotel",
+    image: room.image_url || "https://images.unsplash.com/photo-1611892440504-42a792e24d32?q=80&w=2070",
+    rating: 4.7,
+    reviews: Math.floor(Math.random() * 150) + 30,
+    price: Number(room.price_per_night),
+    capacity: def.capacity,
+    size: def.size,
+    bed: def.bed,
+    status: room.status,
+    description: room.description || "Kamar premium dengan fasilitas terbaik.",
+    facilities: room.facilities || [],
+  };
+}
 
 function formatRupiah(angka) {
   return "Rp " + angka.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
@@ -119,12 +167,56 @@ const statusColors = {
 
 export default function KatalogSection() {
   const [activeFilter, setActiveFilter] = useState("Semua");
+  const [rooms, setRooms] = useState([]);
+  const [loading, setLoading] = useState(true);
   const categories = ["Semua", "Deluxe", "Suite", "Superior", "Penthouse", "Villa"];
+
+  // Fetch rooms from Supabase
+  useEffect(() => {
+    let cancelled = false;
+
+    const fetchRooms = async () => {
+      try {
+        setLoading(true);
+        const { data, error: fetchError } = await supabase
+          .from("rooms")
+          .select("*")
+          .order("room_number");
+
+        if (cancelled) return;
+
+        if (fetchError) throw fetchError;
+
+        setRooms((data || []).map(mapRoom));
+      } catch (err) {
+        console.warn("Fetch rooms dari Supabase gagal, pakai data dummy:", err.message);
+        // Fallback ke mock data jika tabel rooms belum ada
+        if (!cancelled) {
+          setRooms(fallbackRoomsData);
+        }
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    };
+
+    fetchRooms();
+    return () => { cancelled = true; };
+  }, []);
 
   const filteredRooms =
     activeFilter === "Semua"
-      ? roomsData
-      : roomsData.filter((r) => r.category === activeFilter);
+      ? rooms
+      : rooms.filter((r) => r.category === activeFilter);
+
+  if (loading) {
+    return (
+      <section id="katalog" className="py-20 md:py-28 bg-gradient-to-b from-gray-50 to-white scroll-mt-20">
+        <div className="max-w-7xl mx-auto px-6 md:px-8">
+          <LoadingSpinner />
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section id="katalog" className="py-20 md:py-28 bg-gradient-to-b from-gray-50 to-white scroll-mt-20">
@@ -175,7 +267,7 @@ export default function KatalogSection() {
 }
 
 function RoomCard({ room }) {
-  const { isGuest, isMember, isAdmin, getRoomStatus, getDiscountedPrice, user } = useAuth();
+  const { isGuest, isMember, isAdmin, getDiscountedPrice, user } = useAuth();
   const navigate = useNavigate();
 
   const badgeColor = categoryColors[room.category] || "bg-gray-600";
@@ -183,7 +275,7 @@ function RoomCard({ room }) {
 
   const isMemberDiscount = isMember;
   const discountedPrice = getDiscountedPrice(room.price);
-  const roomStatus = getRoomStatus(room.id);
+  const roomStatus = room.status || "Tersedia";
   const statusColor = statusColors[roomStatus] || "bg-gray-100 text-gray-700";
 
   return (

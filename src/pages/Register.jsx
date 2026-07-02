@@ -31,13 +31,15 @@ export default function Register() {
     e.preventDefault();
 
     try {
-      // REGISTER USER KE AUTH SUPABASE
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
+        options: {
+          data: {
+            full_name: fullName,
+          },
+        },
       });
-
-      console.log("SIGNUP DATA:", data);
 
       if (error) {
         alert(error.message);
@@ -49,28 +51,23 @@ export default function Register() {
         return;
       }
 
-      // INSERT KE TABEL PROFILES
-      const { data: profileData, error: profileError } = await supabase
-        .from("profiles")
-        .insert([
-          {
-            id: data.user.id,
-            full_name: fullName,
-            email: email,
-            role: "user",
-          },
-        ])
-        .select();
-
-      console.log("PROFILE DATA:", profileData);
-      console.log("PROFILE ERROR:", profileError);
+      // Insert/upsert ke tabel profiles (fallback jika trigger DB belum aktif)
+      const { error: profileError } = await supabase.from("profiles").upsert(
+        {
+          id: data.user.id,
+          full_name: fullName,
+          role: "member",
+          tier: "Bronze",
+          points: 0,
+        },
+        { onConflict: "id", ignoreDuplicates: true }
+      );
 
       if (profileError) {
-        alert(profileError.message);
-        return;
+        console.warn("Profile upsert warning:", profileError.message);
       }
 
-      alert("Registrasi berhasil!");
+      alert("Registrasi berhasil! Silakan cek email untuk verifikasi.");
       navigate("/auth/login");
     } catch (err) {
       console.error(err);

@@ -41,7 +41,7 @@ export default function HeroSection() {
           <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-md border border-white/20 text-white/90 text-xs font-bold px-4 py-1.5 rounded-full mb-6">
             <span className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse" />
             {isGuest && "Hotel & Resort CRM Premium"}
-            {isMember && `Member ${user.tier} — ${user.points.toLocaleString()} Pts`}
+            {isMember && `Member ${user.tier} — ${(user?.points ?? 0).toLocaleString()} Pts`}
             {isAdmin && "Panel Admin — Dashboard Manajemen"}
           </div>
 
