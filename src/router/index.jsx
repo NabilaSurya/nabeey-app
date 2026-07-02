@@ -19,7 +19,7 @@ const User = lazy(() => import("../pages/User"));
 // Halaman-halaman Mandiri (BEBAS SIDEBAR)
 const Member = lazy(() => import("../pages/Member")); // Ini untuk Admin/Dashboard utama member sebelumnya
 const MemberLanding = lazy(() => import("../pages/member/MemberLanding")); // Halaman Baru untuk Portal Member Biasa
-const Guest = lazy(() => import("../pages/guest/GuestPage"));
+const LandingPage = lazy(() => import("../pages/LandingPage"));
 
 // Tambahan untuk Error & NotFound
 const NotFound = lazy(() => import("../pages/NotFound"));
@@ -80,7 +80,7 @@ const router = createBrowserRouter([
     path: "/",
     element: (
       <Suspense fallback={<Loading />}>
-        <Guest />
+        <LandingPage />
       </Suspense>
     ),
   },

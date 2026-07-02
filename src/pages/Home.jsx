@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
-import { FiPieChart, FiShoppingBag, FiTag, FiUserPlus, FiTrendingUp, FiStar, FiArrowUpRight, FiArrowDownRight } from "react-icons/fi";
+import { FiPieChart, FiShoppingBag, FiTag, FiUserPlus, FiTrendingUp, FiArrowUpRight, FiArrowDownRight, FiUsers } from "react-icons/fi";
+import { useNavigate } from "react-router-dom";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 
 // Import Komponen Global 
@@ -37,6 +38,8 @@ export default function Home() {
     const timer = setTimeout(() => setLoading(false), 400);
     return () => clearTimeout(timer);
   }, []);
+
+  const navigate = useNavigate();
 
   const formatRupiah = (num) => {
     return "Rp " + (num / 1000000).toFixed(1) + " M";
@@ -93,29 +96,29 @@ export default function Home() {
             </div>
           </div>
 
-          {/* KANAN: Gambar pratinjau kamar paling banyak dipesan */}
+          {/* KANAN: Card Member Dashboard */}
           <div className="bg-white p-5 rounded-2xl shadow-[0px_6px_20px_rgba(69,78,124,0.015)] border border-[#EDF2F7] flex flex-col justify-between h-[320px]">
             <div>
-              <h3 className="text-sm font-bold text-[#151D48] mb-0.5">Top Favorite Room</h3>
-              <p className="text-[11px] text-[#737791] mb-4">Most wanted choice from guest bookings</p>
+              <h3 className="text-sm font-bold text-[#151D48] mb-0.5">Member Overview</h3>
+              <p className="text-[11px] text-[#737791] mb-4">Quick access to member management</p>
             </div>
             
             <div className="bg-[#FAFBFF] p-4 rounded-xl border border-[#F4F5F9] flex flex-col justify-between h-full">
-              <div className="w-full h-24 bg-slate-200 rounded-lg overflow-hidden relative mb-2">
-                <div className="absolute top-2 right-2 bg-white/80 backdrop-blur-xs px-2 py-0.5 rounded-md text-[10px] font-bold text-[#FF947A] flex items-center gap-0.5">
-                  <FiStar className="fill-current" /> 5.0
-                </div>
-                <div className="w-full h-full bg-linear-to-br from-[#5B5FEF]/20 to-[#3CD856]/20 flex items-center justify-center text-xs font-semibold text-[#737791]">
-                  Garden Villa Preview Image
-                </div>
+              <div className="w-full h-24 bg-gradient-to-br from-[#5B5FEF]/20 to-purple-200 rounded-lg overflow-hidden relative mb-2 flex items-center justify-center">
+                <FiUsers size={40} className="text-[#5B5FEF]/40" />
               </div>
               <div>
-                <h4 className="text-sm font-bold text-[#151D48]">Garden Villa</h4>
-                <p className="text-[11px] text-[#737791]">Luxury Stay • Reserved by Bruce Wayne</p>
+                <h4 className="text-sm font-bold text-[#151D48]">Total Member Terdaftar</h4>
+                <p className="text-[11px] text-[#737791]">Manage loyalty members & their rewards</p>
               </div>
               <div className="flex justify-between items-center border-t border-[#F4F5F9] pt-2 mt-2">
-                <span className="text-xs font-bold text-[#5B5FEF]">Value: Rp 94.500.000</span>
-                <span className="text-[10px] bg-[#DCFCE7] text-[#3CD856] px-2 py-0.5 rounded-full font-bold">In-House</span>
+                <span className="text-xs font-bold text-[#5B5FEF]">Lihat Detail Member</span>
+                <button 
+                  onClick={() => navigate("/admin/member")}
+                  className="text-[10px] bg-[#5B5FEF] text-white px-3 py-1.5 rounded-full font-bold hover:bg-[#4a4ce0] transition-all cursor-pointer"
+                >
+                  Buka Member
+                </button>
               </div>
             </div>
           </div>
