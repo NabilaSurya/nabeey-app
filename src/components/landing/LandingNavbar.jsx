@@ -1,6 +1,25 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { FiMenu, FiX } from "react-icons/fi";
+import {
+  FiMenu,
+  FiX,
+  FiChevronDown,
+  FiUser,
+  FiLogOut,
+  FiAward,
+  FiLayout,
+} from "react-icons/fi";
+import { useAuth } from "../../context/AuthContext";
+import {
+  Sheet,
+  SheetTrigger,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetDescription,
+  SheetClose,
+} from "@/components/ui/sheet";
+import { Button } from "@/components/ui/button";
 
 const navLinks = [
   { label: "Home", href: "#home" },
@@ -10,12 +29,12 @@ const navLinks = [
   { label: "Hubungi Kami", href: "#kontak" },
 ];
 
-// Cek apakah link eksternal (bukan anchor)
 function isExternalLink(href) {
   return href.startsWith("/");
 }
 
 export default function LandingNavbar() {
+  const { user, isGuest, isMember, isAdmin, logout } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
 
@@ -35,6 +54,11 @@ export default function LandingNavbar() {
         setIsOpen(false);
       }
     }
+  };
+
+  const handleLogout = () => {
+    logout();
+    setIsOpen(false);
   };
 
   return (
@@ -80,20 +104,100 @@ export default function LandingNavbar() {
           )}
         </div>
 
-        {/* Desktop CTA */}
+        {/* Desktop CTA — Dinamis per Role */}
         <div className="hidden md:flex items-center gap-3">
-          <Link
-            to="/auth/login"
-            className="inline-flex items-center px-5 py-2.5 text-sm font-bold text-[#5B5FEF] border-2 border-[#5B5FEF] rounded-xl hover:bg-[#5B5FEF] hover:text-white transition-all duration-200"
-          >
-            Masuk
-          </Link>
-          <Link
-            to="/auth/register"
-            className="inline-flex items-center px-5 py-2.5 text-sm font-bold text-white bg-[#5B5FEF] rounded-xl hover:bg-[#4a4ce0] shadow-md shadow-[#5B5FEF]/20 transition-all duration-200"
-          >
-            Daftar
-          </Link>
+          {isGuest && (
+            <>
+              <Link
+                to="/auth/login"
+                className="inline-flex items-center px-5 py-2.5 text-sm font-bold text-[#5B5FEF] border-2 border-[#5B5FEF] rounded-xl hover:bg-[#5B5FEF] hover:text-white transition-all duration-200"
+              >
+                Masuk
+              </Link>
+              <Link
+                to="/auth/register"
+                className="inline-flex items-center px-5 py-2.5 text-sm font-bold text-white bg-[#5B5FEF] rounded-xl hover:bg-[#4a4ce0] shadow-md shadow-[#5B5FEF]/20 transition-all duration-200"
+              >
+                Pesan Kamar
+              </Link>
+            </>
+          )}
+
+          {isMember && (
+            <div className="flex items-center gap-3">
+              {/* Tier Badge */}
+              <span className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold bg-amber-50 text-amber-700 border border-amber-200 rounded-full">
+                <FiAward size={12} />
+                {user.tier}
+              </span>
+              {/* Points Badge */}
+              <span className="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-bold bg-indigo-50 text-[#5B5FEF] border border-indigo-100 rounded-full">
+                {user.points.toLocaleString()} Pts
+              </span>
+
+              {/* Sheet Dropdown untuk menu Member */}
+              <Sheet>
+                <SheetTrigger asChild>
+                  <button className="flex items-center gap-2 bg-gray-50 hover:bg-gray-100 border border-gray-200 rounded-xl px-3 py-1.5 transition-all">
+                    <div className="w-7 h-7 rounded-lg bg-[#5B5FEF] text-white flex items-center justify-center text-xs font-bold">
+                      {user.name.charAt(0)}
+                    </div>
+                    <span className="text-xs font-bold text-gray-700">
+                      {user.name.split(" ")[0]}
+                    </span>
+                    <FiChevronDown size={14} className="text-gray-400" />
+                  </button>
+                </SheetTrigger>
+                <SheetContent side="right" className="w-72">
+                  <SheetHeader className="pb-4 border-b border-gray-100">
+                    <div className="flex items-center gap-3">
+                      <div className="w-12 h-12 rounded-xl bg-[#5B5FEF] text-white flex items-center justify-center text-lg font-bold">
+                        {user.name.charAt(0)}
+                      </div>
+                      <div>
+                        <SheetTitle className="text-sm font-bold text-gray-900">
+                          {user.name}
+                        </SheetTitle>
+                        <SheetDescription className="text-xs text-gray-500">
+                          {user.tier} Member • {user.points.toLocaleString()} Pts
+                        </SheetDescription>
+                      </div>
+                    </div>
+                  </SheetHeader>
+                  <div className="flex flex-col gap-1 py-4">
+                    <SheetClose asChild>
+                      <Link
+                        to="/MemberLanding"
+                        className="flex items-center gap-3 px-3 py-2.5 text-sm font-semibold text-gray-700 hover:bg-gray-50 rounded-xl transition-all"
+                      >
+                        <FiLayout size={16} className="text-[#5B5FEF]" />
+                        Dashboard Saya
+                      </Link>
+                    </SheetClose>
+                  </div>
+                  <div className="border-t border-gray-100 pt-4">
+                    <button
+                      onClick={handleLogout}
+                      className="flex items-center gap-3 px-3 py-2.5 text-sm font-semibold text-red-600 hover:bg-red-50 rounded-xl w-full transition-all"
+                    >
+                      <FiLogOut size={16} />
+                      Keluar
+                    </button>
+                  </div>
+                </SheetContent>
+              </Sheet>
+            </div>
+          )}
+
+          {isAdmin && (
+            <Link
+              to="/admin"
+              className="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-bold text-white bg-red-500 hover:bg-red-600 rounded-xl shadow-md transition-all duration-200"
+            >
+              <FiLayout size={16} />
+              Kembali ke Dashboard CRM
+            </Link>
+          )}
         </div>
 
         {/* Mobile Toggle */}
@@ -134,20 +238,55 @@ export default function LandingNavbar() {
             )
           )}
           <div className="flex flex-col gap-3 mt-4 pt-4 border-t border-gray-100">
-            <Link
-              to="/auth/login"
-              onClick={() => setIsOpen(false)}
-              className="w-full text-center py-3 text-sm font-bold text-[#5B5FEF] border-2 border-[#5B5FEF] rounded-xl hover:bg-[#5B5FEF] hover:text-white transition-all"
-            >
-              Masuk
-            </Link>
-            <Link
-              to="/auth/register"
-              onClick={() => setIsOpen(false)}
-              className="w-full text-center py-3 text-sm font-bold text-white bg-[#5B5FEF] rounded-xl hover:bg-[#4a4ce0] transition-all"
-            >
-              Daftar
-            </Link>
+            {isGuest && (
+              <>
+                <Link
+                  to="/auth/login"
+                  onClick={() => setIsOpen(false)}
+                  className="w-full text-center py-3 text-sm font-bold text-[#5B5FEF] border-2 border-[#5B5FEF] rounded-xl hover:bg-[#5B5FEF] hover:text-white transition-all"
+                >
+                  Masuk
+                </Link>
+                <Link
+                  to="/auth/register"
+                  onClick={() => setIsOpen(false)}
+                  className="w-full text-center py-3 text-sm font-bold text-white bg-[#5B5FEF] rounded-xl hover:bg-[#4a4ce0] transition-all"
+                >
+                  Daftar
+                </Link>
+              </>
+            )}
+            {isMember && (
+              <>
+                <div className="flex items-center gap-2 px-2 text-xs text-gray-500">
+                  <FiUser size={14} />
+                  <span className="font-bold text-gray-700">{user.name}</span>
+                  <span className="ml-auto text-amber-600 font-bold">{user.tier}</span>
+                </div>
+                <Link
+                  to="/MemberLanding"
+                  onClick={() => setIsOpen(false)}
+                  className="w-full text-center py-3 text-sm font-bold text-white bg-[#5B5FEF] rounded-xl transition-all"
+                >
+                  Dashboard Saya
+                </Link>
+                <button
+                  onClick={handleLogout}
+                  className="w-full text-center py-3 text-sm font-bold text-red-600 border border-red-200 rounded-xl hover:bg-red-50 transition-all"
+                >
+                  Keluar
+                </button>
+              </>
+            )}
+            {isAdmin && (
+              <Link
+                to="/admin"
+                onClick={() => setIsOpen(false)}
+                className="w-full text-center py-3 text-sm font-bold text-white bg-red-500 rounded-xl transition-all"
+              >
+                Kembali ke Dashboard CRM
+              </Link>
+            )}
           </div>
         </div>
       </div>
