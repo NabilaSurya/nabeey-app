@@ -1,13 +1,15 @@
 import { useState, useEffect } from "react";
-import { FiGrid, FiActivity, FiMapPin, FiUsers, FiMessageSquare, FiChevronRight, FiMenu, FiX } from "react-icons/fi";
-import { useLocation, useNavigate } from "react-router-dom"; 
+import { FiGrid, FiActivity, FiMapPin, FiUsers, FiChevronRight, FiMenu, FiX, FiLogOut, FiUser } from "react-icons/fi";
+import { useLocation, useNavigate, Link } from "react-router-dom";
+import { useAuth } from "../../context/AuthContext"; 
 
 export default function GuestNavbar() {
+  const { isMember, signOut } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   
-  const location = useLocation(); // Mendapatkan rute aktif saat ini
-  const navigate = useNavigate(); // Untuk berpindah halaman jika di luar home
+  const location = useLocation();
+  const navigate = useNavigate();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -63,34 +65,36 @@ export default function GuestNavbar() {
             Luxe<span className="text-[#5B5FEF]">Stay</span>
           </span>
           <span className="text-[9px] font-extrabold bg-[#5B5FEF]/10 text-[#5B5FEF] px-2 py-0.5 rounded-full uppercase tracking-widest">
-            GUEST
+            {isMember ? "MEMBER" : "GUEST"}
           </span>
         </div>
 
         {/* MENU NAVIGASI (DESKTOP) */}
         <div className="hidden md:flex gap-6 text-sm font-bold text-slate-600">
           <a href="#dashboard" onClick={(e) => handleScrollToSection(e, "dashboard")} className="flex items-center gap-1.5 hover:text-[#5B5FEF] transition-colors">
-            <FiGrid size={16} /> Market
+            <FiGrid size={16} /> Home
           </a>
           <a href="#rooms" onClick={(e) => handleScrollToSection(e, "rooms")} className="flex items-center gap-1.5 hover:text-[#5B5FEF] transition-colors">
-            <FiActivity size={16} /> Properties
+            <FiActivity size={16} /> Rooms
           </a>
           <a href="#destinations" onClick={(e) => handleScrollToSection(e, "destinations")} className="flex items-center gap-1.5 hover:text-[#5B5FEF] transition-colors">
-            <FiMapPin size={16} /> Destinations
+            <FiMapPin size={16} /> About
           </a>
-          <a href="#community" onClick={(e) => handleScrollToSection(e, "community")} className="flex items-center gap-1.5 hover:text-[#5B5FEF] transition-colors">
-            <FiUsers size={16} /> Membership
-          </a>
-          <a href="#services" onClick={(e) => handleScrollToSection(e, "services")} className="flex items-center gap-1.5 hover:text-[#5B5FEF] transition-colors">
-            <FiMessageSquare size={16} /> Pusat Layanan
-          </a>
-        </div>
 
-        {/* BUTTON ACTION */}
-        <div className="hidden md:block">
-          <a href="/auth/login" className="inline-flex items-center gap-1 bg-[#5B5FEF] hover:bg-[#4834D4] text-white text-xs font-bold px-5 py-2.5 rounded-xl transition-all shadow-md transform hover:-translate-y-0.5">
-            Start Booking <FiChevronRight />
-          </a>
+          {isMember ? (
+            <>
+              <Link to="/MemberLanding" className="flex items-center gap-1.5 text-[#5B5FEF] hover:text-[#4834D4] transition-colors">
+                <FiUser size={16} /> Member
+              </Link>
+              <button onClick={async () => { await signOut(); navigate("/"); }} className="flex items-center gap-1.5 text-rose-500 hover:text-rose-600 transition-colors">
+                <FiLogOut size={16} /> Logout
+              </button>
+            </>
+          ) : (
+            <Link to="/auth/login" className="inline-flex items-center gap-1 bg-[#5B5FEF] hover:bg-[#4834D4] text-white text-xs font-bold px-5 py-2.5 rounded-xl transition-all shadow-md">
+              Login <FiChevronRight />
+            </Link>
+          )}
         </div>
 
         {/* MOBILE TOGGLE */}
@@ -104,12 +108,17 @@ export default function GuestNavbar() {
       {/* MOBILE DROPDOWN */}
       <div className={`md:hidden absolute top-full left-0 w-full bg-white border-b border-slate-100 shadow-xl transition-all duration-300 ${isOpen ? "opacity-100 translate-y-0 visible" : "opacity-0 -translate-y-4 invisible"}`}>
         <div className="flex flex-col px-6 py-6 gap-4 text-sm font-bold text-slate-600">
-          <a href="#dashboard" onClick={(e) => handleScrollToSection(e, "dashboard")} className="flex items-center gap-3 py-2 border-b border-slate-50"><FiGrid size={18} /> Market</a>
-          <a href="#rooms" onClick={(e) => handleScrollToSection(e, "rooms")} className="flex items-center gap-3 py-2 border-b border-slate-50"><FiActivity size={18} /> Properties</a>
-          <a href="#destinations" onClick={(e) => handleScrollToSection(e, "destinations")} className="flex items-center gap-3 py-2 border-b border-slate-50"><FiMapPin size={18} /> Destinations</a>
-          <a href="#community" onClick={(e) => handleScrollToSection(e, "community")} className="flex items-center gap-3 py-2 border-b border-slate-50"><FiUsers size={18} /> Community</a>
-          <a href="#services" onClick={(e) => handleScrollToSection(e, "services")} className="flex items-center gap-3 py-2 border-b border-slate-50"><FiMessageSquare size={18} /> Pusat Layanan</a>
-          <a href="/auth/login" className="w-full mt-2 text-center bg-[#5B5FEF] text-white text-xs font-bold py-3.5 rounded-xl block">Start Booking</a>
+          <a href="#dashboard" onClick={(e) => handleScrollToSection(e, "dashboard")} className="flex items-center gap-3 py-2 border-b border-slate-50"><FiGrid size={18} /> Home</a>
+          <a href="#rooms" onClick={(e) => handleScrollToSection(e, "rooms")} className="flex items-center gap-3 py-2 border-b border-slate-50"><FiActivity size={18} /> Rooms</a>
+          <a href="#destinations" onClick={(e) => handleScrollToSection(e, "destinations")} className="flex items-center gap-3 py-2 border-b border-slate-50"><FiMapPin size={18} /> About</a>
+          {isMember ? (
+            <>
+              <Link to="/MemberLanding" onClick={() => setIsOpen(false)} className="flex items-center gap-3 py-2 border-b border-slate-50 text-[#5B5FEF]"><FiUser size={18} /> Member</Link>
+              <button onClick={async () => { await signOut(); setIsOpen(false); navigate("/"); }} className="w-full mt-2 text-center bg-rose-600 text-white text-xs font-bold py-3.5 rounded-xl block">Logout</button>
+            </>
+          ) : (
+            <Link to="/auth/login" onClick={() => setIsOpen(false)} className="w-full mt-2 text-center bg-[#5B5FEF] text-white text-xs font-bold py-3.5 rounded-xl block">Login</Link>
+          )}
         </div>
       </div>
     </nav>

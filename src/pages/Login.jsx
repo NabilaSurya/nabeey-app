@@ -54,8 +54,10 @@ export default function Login() {
 
     if (userRole === "admin") {
       navigate("/admin");
-    } else {
+    } else if (userRole === "member") {
       navigate("/MemberLanding");
+    } else {
+      navigate("/");
     }
   };
 

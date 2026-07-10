@@ -1,12 +1,13 @@
 import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { 
   FiGrid, FiActivity, FiMapPin, FiUsers, FiMessageSquare, 
   FiChevronRight, FiMenu, FiX, FiCheckCircle, FiUser, FiMail, 
   FiGift, FiCreditCard, FiAward, FiLogOut, FiHome, FiSliders, FiPhone,
-  FiSearch, FiFilter, FiInfo, FiStar
+  FiSearch, FiFilter, FiInfo, FiStar, FiArrowLeft
 } from "react-icons/fi";
 import { AuthProvider, useAuth } from "../../context/AuthContext";
+import { supabase } from "../../lib/supabase";
 
 export default function Member() {
   return (
@@ -17,6 +18,7 @@ export default function Member() {
 }
 
 function MemberContent() {
+  const navigate = useNavigate();
   const { user, isGuest, isMember, signOut } = useAuth();
 
   // Navbar States
@@ -113,14 +115,41 @@ function MemberContent() {
     setActiveView("home");
   };
 
-  const handleRedeemReward = (reward) => {
+  const handleRedeemReward = async (reward) => {
     if (member.points < reward.cost) {
       showNotification("Maaf, poin Anda tidak mencukupi untuk klaim reward ini.", "error");
       return;
     }
 
-    setMember(prev => ({ ...prev, points: prev.points - reward.cost }));
-    showNotification(`Sukses klaim "${reward.title}"! Kode voucher dikirim ke ${member.email}`, "success");
+    try {
+      // 1. Catat penukaran reward ke tabel rewards_redemption
+      const { error: redeemError } = await supabase.from("rewards_redemption").insert({
+        user_id: user.id,
+        reward_type: reward.title,
+        reward_title: reward.title,
+        points_spent: reward.cost,
+        status: "Processed",
+      });
+
+      if (redeemError) throw redeemError;
+
+      // 2. Kurangi poin di tabel profiles
+      const totalPoints = (member.points - reward.cost);
+      
+      const { error: updateError } = await supabase
+        .from("profiles")
+        .update({ points: totalPoints })
+        .eq("id", user.id);
+
+      if (updateError) throw updateError;
+
+      // 3. Update state lokal
+      setMember(prev => ({ ...prev, points: totalPoints }));
+      showNotification(`Sukses klaim "${reward.title}"! Kode voucher dikirim ke ${member.email}`, "success");
+    } catch (err) {
+      console.error("Gagal redeem reward:", err);
+      showNotification("Gagal menukarkan poin: " + err.message, "error");
+    }
   };
 
   // Interaktivitas: Mengubah status booking langsung dari tabel
@@ -177,8 +206,16 @@ function MemberContent() {
               </span>
             </div>
 
+            {/* TOMBOL KEMBALI KE BELANJA */}
+            <button 
+              onClick={() => navigate("/guest")}
+              className="hidden md:flex items-center gap-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 text-[11px] font-bold px-4 py-2 rounded-xl border border-emerald-200 transition-all"
+            >
+              <FiArrowLeft size={14} /> Kembali ke Belanja
+            </button>
+
             {/* NAVIGATION LINKS */}
-            <div className="hidden md:flex gap-6 text-sm font-bold text-slate-600">
+            <div className="hidden md:flex items-center gap-6 text-sm font-bold text-slate-600">
               <button 
                 onClick={() => setActiveView("home")} 
                 className={`flex items-center gap-1.5 transition-colors ${activeView === "home" ? "text-[#5B5FEF]" : "hover:text-[#5B5FEF]"}`}
@@ -234,6 +271,7 @@ function MemberContent() {
           {/* MOBILE DROPDOWN */}
           <div className={`md:hidden absolute top-full left-0 w-full bg-white border-b border-slate-200 shadow-xl transition-all duration-300 ${isOpen ? "opacity-100 translate-y-0 visible" : "opacity-0 -translate-y-4 invisible"}`}>
             <div className="flex flex-col px-6 py-6 gap-4 text-sm font-bold text-slate-600">
+              <button onClick={() => { navigate("/guest"); setIsOpen(false); }} className="flex items-center gap-3 py-2 border-b border-slate-100 text-slate-900"><FiArrowLeft size={18} /> Kembali ke Belanja</button>
               <button onClick={() => { setActiveView("home"); setIsOpen(false); }} className="flex items-center gap-3 py-2 border-b border-slate-100 text-slate-900"><FiHome size={18} /> Home Dashboard</button>
               <button onClick={() => { setActiveView("rewards"); setIsOpen(false); }} className="flex items-center gap-3 py-2 border-b border-slate-100 text-slate-900"><FiGift size={18} /> Tukar Rewards</button>
               <button onClick={() => { setActiveView("profile"); setIsOpen(false); }} className="flex items-center gap-3 py-2 border-b border-slate-100 text-slate-900"><FiUser size={18} /> Edit Profil</button>

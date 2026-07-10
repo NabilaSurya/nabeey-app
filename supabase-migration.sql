@@ -1,172 +1,140 @@
 -- ============================================================
--- LUXSTAY CRM - FULL DATABASE MIGRATION
--- Execute this entire script in Supabase SQL Editor
+-- MIGRATION: Fitur Point Loyalty & Belanja + Booking Guest
+-- Tabel untuk mencatat transaksi belanja yang butuh ACC admin
 -- ============================================================
 
--- 1. ENUM TYPES
-CREATE TYPE user_role AS ENUM ('admin', 'member');
-CREATE TYPE member_tier AS ENUM ('Bronze', 'Silver', 'Gold', 'Platinum');
-CREATE TYPE room_status AS ENUM ('Tersedia', 'Terisi', 'Maintenance');
-CREATE TYPE booking_status AS ENUM ('Pending', 'Confirmed', 'Checked_In', 'Checked_Out', 'Cancelled');
-
--- 2. TABEL PROFILES (Ekstensi Supabase Auth Users)
-CREATE TABLE profiles (
-    id UUID REFERENCES auth.users(id) ON DELETE CASCADE PRIMARY KEY,
-    full_name TEXT NOT NULL,
-    role user_role DEFAULT 'member'::user_role,
-    tier member_tier DEFAULT 'Bronze'::member_tier,
-    points INT DEFAULT 0 CHECK (points >= 0),
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW()) NOT NULL,
-    updated_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW()) NOT NULL
-);
-
--- 3. TABEL KAMAR
-CREATE TABLE rooms (
+-- 1. TABEL TRANSACTIONS (Belanja Member & Booking Guest)
+CREATE TABLE IF NOT EXISTS transactions (
     id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-    room_number TEXT UNIQUE NOT NULL,
-    room_type TEXT NOT NULL,
-    price_per_night NUMERIC(12, 2) NOT NULL CHECK (price_per_night >= 0),
-    status room_status DEFAULT 'Tersedia'::room_status,
-    image_url TEXT,
-    facilities TEXT[],
-    description TEXT,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW()) NOT NULL
+    user_id UUID REFERENCES profiles(id) ON DELETE CASCADE,
+    invoice_number TEXT NOT NULL,
+    total_amount NUMERIC NOT NULL,
+    estimated_points INTEGER NOT NULL,
+    status TEXT DEFAULT 'Pending' CHECK (status IN ('Pending', 'Approved', 'Rejected')),
+    -- Kolom untuk Guest Booking (nullable untuk member)
+    guest_name TEXT,
+    guest_email TEXT,
+    guest_phone TEXT,
+    check_in DATE,
+    check_out DATE,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- 4. TABEL RESERVASI / BOOKING
-CREATE TABLE bookings (
+-- 2. TABEL REWARDS_REDEMPTION (Riwayat Penukaran Poin)
+CREATE TABLE IF NOT EXISTS rewards_redemption (
     id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-    member_id UUID REFERENCES profiles(id) ON DELETE SET NULL,
-    room_id UUID REFERENCES rooms(id) ON DELETE RESTRICT,
-    check_in_date DATE NOT NULL,
-    check_out_date DATE NOT NULL,
-    total_price NUMERIC(12, 2) NOT NULL,
-    status booking_status DEFAULT 'Pending'::booking_status,
-    potential_points INT GENERATED ALWAYS AS (FLOOR(total_price / 100000) * 10) STORED,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW()) NOT NULL,
-    CONSTRAINT check_dates CHECK (check_out_date > check_in_date)
+    user_id UUID REFERENCES profiles(id) ON DELETE CASCADE,
+    reward_type TEXT NOT NULL,
+    reward_title TEXT NOT NULL,
+    points_spent INTEGER NOT NULL,
+    status TEXT DEFAULT 'Processed' CHECK (status IN ('Processed', 'Cancelled')),
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- 5. TRIGGER: Auto-create profile on user signup
-CREATE OR REPLACE FUNCTION public.handle_new_user()
-RETURNS TRIGGER AS $$
-BEGIN
-  INSERT INTO public.profiles (id, full_name, role, tier, points)
-  VALUES (
-    new.id,
-    COALESCE(new.raw_user_meta_data->>'full_name', 'Tamu Luxstay'),
-    'member',
-    'Bronze',
-    0
+-- 3. ALTER TABLE untuk database yang sudah ada (tambahkan kolom guest booking)
+ALTER TABLE transactions ADD COLUMN IF NOT EXISTS guest_name TEXT;
+ALTER TABLE transactions ADD COLUMN IF NOT EXISTS guest_email TEXT;
+ALTER TABLE transactions ADD COLUMN IF NOT EXISTS guest_phone TEXT;
+ALTER TABLE transactions ADD COLUMN IF NOT EXISTS check_in DATE;
+ALTER TABLE transactions ADD COLUMN IF NOT EXISTS check_out DATE;
+
+-- Tambahkan kolom tier ke profiles jika belum ada (dibutuhkan oleh AuthContext, diskon member, dll)
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS tier TEXT DEFAULT 'Bronze';
+
+-- 4. ROW LEVEL SECURITY POLICIES (perbaiki error "violates row-level security policy")
+ALTER TABLE transactions ENABLE ROW LEVEL SECURITY;
+ALTER TABLE rewards_redemption ENABLE ROW LEVEL SECURITY;
+
+-- Policy: Izinkan INSERT untuk siapa saja (guest booking & member checkout)
+DROP POLICY IF EXISTS "transactions_insert_policy" ON transactions;
+CREATE POLICY "transactions_insert_policy" ON transactions
+  FOR INSERT
+  WITH CHECK (true);
+
+-- Policy: Izinkan SELECT untuk authenticated users (melihat data sendiri)
+DROP POLICY IF EXISTS "transactions_select_own" ON transactions;
+CREATE POLICY "transactions_select_own" ON transactions
+  FOR SELECT
+  USING (auth.uid() = user_id OR user_id IS NULL);
+
+-- Policy: Izinkan SELECT untuk admin (lihat semua transaksi)
+DROP POLICY IF EXISTS "transactions_select_admin" ON transactions;
+CREATE POLICY "transactions_select_admin" ON transactions
+  FOR SELECT
+  USING (
+    EXISTS (
+      SELECT 1 FROM profiles 
+      WHERE id = auth.uid() AND role = 'admin'
+    )
   );
-  RETURN NEW;
-END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
 
-CREATE TRIGGER on_auth_user_created
-  AFTER INSERT ON auth.users
-  FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
+-- Policy: Izinkan UPDATE hanya untuk admin (cek dari tabel profiles)
+DROP POLICY IF EXISTS "transactions_update_policy" ON transactions;
+CREATE POLICY "transactions_update_policy" ON transactions
+  FOR UPDATE
+  USING (
+    EXISTS (
+      SELECT 1 FROM profiles 
+      WHERE id = auth.uid() AND role = 'admin'
+    )
+  );
 
--- 6. SEED DATA: Sample Rooms (10 kamar)
-INSERT INTO rooms (room_number, room_type, price_per_night, status, image_url, facilities, description) VALUES
-('RM-001', 'Deluxe', 1200000, 'Tersedia', 'https://images.unsplash.com/photo-1578683010236-d716f9a3f461?q=80&w=2070&auto=format&fit=crop',
-  ARRAY['AC & Pemanas', 'Wi-Fi 100 Mbps', 'TV Layar Datar 50"', 'Mini Bar', 'Bathtub Marmer', 'Balkon Pribadi'],
-  'Kamar Deluxe dengan pemandangan laut yang menakjubkan. Dilengkapi dengan balkon pribadi, TV layar datar 50 inci, dan kamar mandi marmer dengan bathtub.'),
-('RM-002', 'Suite', 2500000, 'Tersedia', 'https://images.unsplash.com/photo-1631049307264-da0ec9d70304?q=80&w=2070&auto=format&fit=crop',
-  ARRAY['Ruang Tamu Terpisah', 'Butler Service', 'Access Executive Lounge', 'Wi-Fi 200 Mbps', 'Espresso Machine', 'Smart TV 65"'],
-  'Suite eksekutif dengan ruang tamu terpisah, akses ke Executive Lounge, dan pemandangan kota yang spektakuler.'),
-('RM-003', 'Superior', 800000, 'Tersedia', 'https://images.unsplash.com/photo-1595576508898-0ad5c879a061?q=80&w=2070&auto=format&fit=crop',
-  ARRAY['AC & Pemanas', 'Wi-Fi Gratis', 'TV Layar Datar 40"', 'Kamar Mandi Shower', 'Meja Kerja', 'Coffee & Tea Maker'],
-  'Kamar Superior dengan dua tempat tidur single yang nyaman. Cocok untuk kolega atau teman.'),
-('RM-004', 'Penthouse', 5500000, 'Tersedia', 'https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?q=80&w=2070&auto=format&fit=crop',
-  ARRAY['Kolam Renang Pribadi', 'Ruang Keluarga', 'Dapur Lengkap', 'Private Chef', 'Home Theater', 'Terrace Luas'],
-  'Penthouse mewah di lantai tertinggi dengan pemandangan 360° kota.'),
-('RM-005', 'Deluxe', 2200000, 'Tersedia', 'https://images.unsplash.com/photo-1566665797739-1674de7a421a?q=80&w=2070&auto=format&fit=crop',
-  ARRAY['2 Kamar Terhubung', 'Ruang Bermain Anak', '2 Kamar Mandi', 'Kulkas & Microwave', 'Smart TV 2 Unit', 'Wi-Fi 150 Mbps'],
-  'Dua kamar terhubung yang sempurna untuk keluarga.'),
-('RM-006', 'Villa', 3500000, 'Tersedia', 'https://images.unsplash.com/photo-1571003123894-1f0594d2b5d9?q=80&w=2070&auto=format&fit=crop',
-  ARRAY['Kolam Renang Pribadi', 'Gazebo & Garden', 'Area BBQ', 'Dapur Mini', 'Parkir Mobil', 'Wi-Fi 200 Mbps'],
-  'Villa pribadi di tengah taman tropis yang asri.'),
-('RM-007', 'Superior', 550000, 'Tersedia', 'https://images.unsplash.com/photo-1611892440504-42a792e24d32?q=80&w=2070&auto=format&fit=crop',
-  ARRAY['AC', 'Wi-Fi Gratis', 'TV Layar Datar 32"', 'Kamar Mandi Shower', 'Meja Kerja', 'Safety Box'],
-  'Kamar standar nyaman dengan harga terjangkau.'),
-('RM-008', 'Suite', 3200000, 'Tersedia', 'https://images.unsplash.com/photo-1590490360182-c33d57733427?q=80&w=2070&auto=format&fit=crop',
-  ARRAY['Canopy King Bed', 'Bathtub for 2', 'Bunga Segar Harian', 'Spa Bath Set', 'Smart TV 55"', 'Private Balcony'],
-  'Suite romantis untuk momen spesial Anda.'),
-('RM-009', 'Superior', 650000, 'Tersedia', 'https://images.unsplash.com/photo-1584132967334-10e028bd69f7?q=80&w=2070&auto=format&fit=crop',
-  ARRAY['Akses Kursi Roda', 'Handrail Kamar Mandi', 'Tombol Darurat', 'AC & Pemanas', 'TV Layar Datar', 'Wi-Fi Gratis'],
-  'Kamar ramah difabel dengan akses kursi roda.');
+-- Policy: rewards_redemption - insert & select untuk user sendiri
+DROP POLICY IF EXISTS "rewards_insert_policy" ON rewards_redemption;
+CREATE POLICY "rewards_insert_policy" ON rewards_redemption
+  FOR INSERT
+  WITH CHECK (auth.uid() = user_id);
 
--- 7. RLS: Enable Row Level Security
+DROP POLICY IF EXISTS "rewards_select_own" ON rewards_redemption;
+CREATE POLICY "rewards_select_own" ON rewards_redemption
+  FOR SELECT
+  USING (auth.uid() = user_id);
+
+-- 5. ROW LEVEL SECURITY POLICIES UNTUK TABEL PROFILES
+-- (Tanpa ini, JOIN dari transactions ke profiles akan gagal dengan error 403)
 ALTER TABLE profiles ENABLE ROW LEVEL SECURITY;
-ALTER TABLE rooms ENABLE ROW LEVEL SECURITY;
-ALTER TABLE bookings ENABLE ROW LEVEL SECURITY;
 
--- 8. RLS POLICIES
+-- Policy: Izinkan admin SELECT semua profil (dibutuhkan untuk JOIN & subquery)
+DROP POLICY IF EXISTS "profiles_select_admin" ON profiles;
+CREATE POLICY "profiles_select_admin" ON profiles
+  FOR SELECT
+  USING (
+    EXISTS (
+      SELECT 1 FROM profiles 
+      WHERE id = auth.uid() AND role = 'admin'
+    )
+  );
 
--- PROFILES
-CREATE POLICY "Users can read own profile"
-  ON profiles FOR SELECT
+-- Policy: Izinkan admin UPDATE profil (untuk menambah poin)
+DROP POLICY IF EXISTS "profiles_update_admin" ON profiles;
+CREATE POLICY "profiles_update_admin" ON profiles
+  FOR UPDATE
+  USING (
+    EXISTS (
+      SELECT 1 FROM profiles 
+      WHERE id = auth.uid() AND role = 'admin'
+    )
+  );
+
+-- Policy: Izinkan user melihat profilnya sendiri
+DROP POLICY IF EXISTS "profiles_select_own" ON profiles;
+CREATE POLICY "profiles_select_own" ON profiles
+  FOR SELECT
   USING (auth.uid() = id);
 
-CREATE POLICY "Admins can read all profiles"
-  ON profiles FOR SELECT
-  USING (
-    EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND role = 'admin')
-  );
+-- Policy: Izinkan user mengupdate profilnya sendiri
+DROP POLICY IF EXISTS "profiles_update_own" ON profiles;
+CREATE POLICY "profiles_update_own" ON profiles
+  FOR UPDATE
+  USING (auth.uid() = id);
 
-CREATE POLICY "Admins can update profiles"
-  ON profiles FOR UPDATE
-  USING (
-    EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND role = 'admin')
-  );
+-- Policy: Izinkan INSERT untuk trigger handle_new_user (via service_role)
+DROP POLICY IF EXISTS "profiles_insert_policy" ON profiles;
+CREATE POLICY "profiles_insert_policy" ON profiles
+  FOR INSERT
+  WITH CHECK (true);
 
-CREATE POLICY "Users can insert own profile"
-  ON profiles FOR INSERT
-  WITH CHECK (auth.uid() = id);
-
--- ROOMS (Public Read)
-CREATE POLICY "Public read rooms"
-  ON rooms FOR SELECT
-  USING (true);
-
-CREATE POLICY "Admins can insert rooms"
-  ON rooms FOR INSERT
-  WITH CHECK (
-    EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND role = 'admin')
-  );
-
-CREATE POLICY "Admins can update rooms"
-  ON rooms FOR UPDATE
-  USING (
-    EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND role = 'admin')
-  );
-
-CREATE POLICY "Admins can delete rooms"
-  ON rooms FOR DELETE
-  USING (
-    EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND role = 'admin')
-  );
-
--- BOOKINGS
-CREATE POLICY "Members can insert own bookings"
-  ON bookings FOR INSERT
-  WITH CHECK (
-    auth.uid() = member_id
-  );
-
-CREATE POLICY "Members can read own bookings"
-  ON bookings FOR SELECT
-  USING (auth.uid() = member_id);
-
-CREATE POLICY "Admins can read all bookings"
-  ON bookings FOR SELECT
-  USING (
-    EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND role = 'admin')
-  );
-
-CREATE POLICY "Admins can update bookings"
-  ON bookings FOR UPDATE
-  USING (
-    EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND role = 'admin')
-  );
+-- 6. INDEX untuk performa query
+CREATE INDEX IF NOT EXISTS idx_transactions_user_id ON transactions(user_id);
+CREATE INDEX IF NOT EXISTS idx_transactions_status ON transactions(status);
+CREATE INDEX IF NOT EXISTS idx_rewards_redemption_user_id ON rewards_redemption(user_id);

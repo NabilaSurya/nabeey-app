@@ -1,6 +1,16 @@
-import { FiStar, FiMapPin, FiCheckCircle } from "react-icons/fi";
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { FiStar, FiMapPin, FiCheckCircle, FiShoppingCart } from "react-icons/fi";
+import { useAuth } from "../../context/AuthContext";
+import { supabase } from "../../lib/supabase";
 
 export default function RoomsSection() {
+  const navigate = useNavigate();
+  const { user, isMember, getDiscountedPrice } = useAuth();
+  const [checkoutLoading, setCheckoutLoading] = useState(null);
+  const [bookingModal, setBookingModal] = useState(null); // { prop } or null
+  const [bookingForm, setBookingForm] = useState({ guest_name: "", guest_email: "", guest_phone: "", check_in: "", check_out: "" });
+
   // DATA KAMAR / PROPERTI YANG SUDAH DIPERBANYAK (6 PILIHAN PREMIUM)
   const propertiesData = [
     { 
@@ -58,6 +68,83 @@ export default function RoomsSection() {
       rating: "4.7"
     }
   ];
+
+  // Format harga diskon untuk member
+  const formatDiscountedPrice = (price) => {
+    const priceInUSD = parseInt(price.replace("$", ""));
+    const discounted = getDiscountedPrice(priceInUSD);
+    return "$" + discounted;
+  };
+
+  // Fungsi Checkout untuk Guest (non-login)
+  const handleGuestBooking = async (e) => {
+    e.preventDefault();
+    if (!bookingModal) return;
+    const prop = bookingModal;
+    setCheckoutLoading(prop.id);
+    try {
+      const invoiceNum = "INV-" + Date.now().toString().slice(-6);
+      const priceInUSD = parseInt(prop.price.replace("$", ""));
+      const totalAmount = priceInUSD * 16000;
+      const estimatedPoints = 0; // Guest tidak dapat poin
+
+      const { error } = await supabase.from("transactions").insert({
+        user_id: null,
+        invoice_number: invoiceNum,
+        total_amount: totalAmount,
+        estimated_points: estimatedPoints,
+        status: "Pending",
+        guest_name: bookingForm.guest_name,
+        guest_email: bookingForm.guest_email,
+        guest_phone: bookingForm.guest_phone,
+        check_in: bookingForm.check_in,
+        check_out: bookingForm.check_out,
+      });
+
+      if (error) throw error;
+
+      alert(`✅ Booking berhasil!\n\nInvoice: ${invoiceNum}\nNama: ${bookingForm.guest_name}\n\nMenunggu konfirmasi admin.`);
+      setBookingModal(null);
+      setBookingForm({ guest_name: "", guest_email: "", guest_phone: "", check_in: "", check_out: "" });
+    } catch (err) {
+      console.error("Gagal booking:", err);
+      alert("Gagal memproses booking: " + err.message);
+    } finally {
+      setCheckoutLoading(null);
+    }
+  };
+
+  // Fungsi Checkout untuk Member
+  const handleCheckout = async (prop) => {
+    setCheckoutLoading(prop.id);
+    try {
+      // Generate invoice number
+      const invoiceNum = "INV-" + Date.now().toString().slice(-6);
+      // Convert price string like "$149" to number in IDR (simulasi: $1 = Rp 16.000)
+      const priceInUSD = parseInt(prop.price.replace("$", ""));
+      const totalAmount = priceInUSD * 16000;
+      // Estimasi poin: setiap Rp 10.000 = 1 poin
+      const estimatedPoints = Math.floor(totalAmount / 10000);
+
+      const { error } = await supabase.from("transactions").insert({
+        user_id: user.id,
+        invoice_number: invoiceNum,
+        total_amount: totalAmount,
+        estimated_points: estimatedPoints,
+        status: "Pending",
+      });
+
+      if (error) throw error;
+
+      // Redirect member ke portal member setelah sukses checkout
+      navigate("/MemberLanding");
+    } catch (err) {
+      console.error("Gagal checkout:", err);
+      alert("Gagal memproses checkout: " + err.message);
+    } finally {
+      setCheckoutLoading(null);
+    }
+  };
 
   // DATA ULASAN TAMU YANG SUDAH DIPERBANYAK (4 REVIEWS)
   const reviewsData = [
@@ -130,15 +217,29 @@ export default function RoomsSection() {
                   </p>
                   
                   <div className="text-2xl font-black text-slate-900">
-                    {prop.price}<span className="text-xs text-slate-400 font-medium"> / night</span>
+                    {isMember ? formatDiscountedPrice(prop.price) : prop.price}<span className="text-xs text-slate-400 font-medium"> / night</span>
                   </div>
                 </div>
               </div>
 
               <div className="p-6 pt-0">
-                <button className="w-full bg-slate-900 hover:bg-[#5B5FEF] text-white text-xs font-bold py-3.5 rounded-xl transition duration-200">
-                  Instantly Book via LuxeStay
-                </button>
+                {isMember ? (
+                  <button
+                    onClick={() => handleCheckout(prop)}
+                    disabled={checkoutLoading === prop.id}
+                    className="w-full bg-emerald-600 hover:bg-emerald-700 disabled:bg-emerald-300 text-white text-xs font-bold py-3.5 rounded-xl transition duration-200 flex items-center justify-center gap-2"
+                  >
+                    <FiShoppingCart size={14} />
+                    {checkoutLoading === prop.id ? "Memproses..." : "Checkout / Beli Sekarang"}
+                  </button>
+                ) : (
+                  <button 
+                    onClick={() => setBookingModal(prop)}
+                    className="w-full bg-slate-900 hover:bg-[#5B5FEF] text-white text-xs font-bold py-3.5 rounded-xl transition duration-200"
+                  >
+                    Instantly Book via LuxeStay
+                  </button>
+                )}
               </div>
             </div>
           ))}
@@ -179,6 +280,55 @@ export default function RoomsSection() {
         </div>
 
       </div>
+
+      {/* ==================== BOOKING MODAL UNTUK GUEST ==================== */}
+      {bookingModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4" onClick={() => setBookingModal(null)}>
+          <div className="bg-white rounded-3xl p-8 max-w-lg w-full shadow-2xl border border-slate-200 animate-in fade-in zoom-in duration-200" onClick={(e) => e.stopPropagation()}>
+            <div className="flex justify-between items-center mb-6">
+              <h3 className="text-lg font-black text-slate-900">Booking Kamar</h3>
+              <button onClick={() => setBookingModal(null)} className="text-slate-400 hover:text-slate-700 text-xl">&times;</button>
+            </div>
+            
+            <div className="mb-4 p-4 bg-slate-50 rounded-xl border border-slate-100">
+              <p className="text-sm font-bold text-slate-900">{bookingModal.name}</p>
+              <p className="text-xs text-slate-500 mt-1">{bookingModal.location}</p>
+              <p className="text-sm font-black text-[#5B5FEF] mt-2">{bookingModal.price} / night</p>
+            </div>
+
+            <form onSubmit={handleGuestBooking} className="space-y-4">
+              <div>
+                <label className="text-[11px] uppercase font-bold text-slate-500 tracking-wider block mb-1.5">Nama Lengkap</label>
+                <input type="text" required value={bookingForm.guest_name} onChange={(e) => setBookingForm(f => ({ ...f, guest_name: e.target.value }))} className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm outline-none focus:border-[#5B5FEF]" placeholder="John Doe" />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="text-[11px] uppercase font-bold text-slate-500 tracking-wider block mb-1.5">Email</label>
+                  <input type="email" required value={bookingForm.guest_email} onChange={(e) => setBookingForm(f => ({ ...f, guest_email: e.target.value }))} className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm outline-none focus:border-[#5B5FEF]" placeholder="email@example.com" />
+                </div>
+                <div>
+                  <label className="text-[11px] uppercase font-bold text-slate-500 tracking-wider block mb-1.5">No. HP</label>
+                  <input type="tel" required value={bookingForm.guest_phone} onChange={(e) => setBookingForm(f => ({ ...f, guest_phone: e.target.value }))} className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm outline-none focus:border-[#5B5FEF]" placeholder="+62 812..." />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="text-[11px] uppercase font-bold text-slate-500 tracking-wider block mb-1.5">Check In</label>
+                  <input type="date" required value={bookingForm.check_in} onChange={(e) => setBookingForm(f => ({ ...f, check_in: e.target.value }))} className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm outline-none focus:border-[#5B5FEF]" />
+                </div>
+                <div>
+                  <label className="text-[11px] uppercase font-bold text-slate-500 tracking-wider block mb-1.5">Check Out</label>
+                  <input type="date" required value={bookingForm.check_out} onChange={(e) => setBookingForm(f => ({ ...f, check_out: e.target.value }))} className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm outline-none focus:border-[#5B5FEF]" />
+                </div>
+              </div>
+              <button type="submit" disabled={checkoutLoading === bookingModal.id} className="w-full bg-[#5B5FEF] hover:bg-[#4834D4] disabled:bg-indigo-300 text-white font-bold py-3.5 rounded-xl transition-all text-sm">
+                {checkoutLoading === bookingModal.id ? "Memproses..." : "Konfirmasi Booking"}
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
+
     </section>
   );
 }
