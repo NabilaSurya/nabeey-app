@@ -127,7 +127,7 @@ export default function KonfirmasiBelanja() {
 
         if (updateError) throw updateError;
 
-        alert(`✅ Booking disetujui! Member mendapatkan 100 poin.`);
+        alert(`✅ Booking disetujui! Poin member berhasil ditambahkan.`);
       } else {
         // Guest booking — tanpa poin
         alert(`✅ Booking guest berhasil disetujui.`);

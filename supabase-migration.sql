@@ -38,8 +38,10 @@ ALTER TABLE transactions ADD COLUMN IF NOT EXISTS guest_phone TEXT;
 ALTER TABLE transactions ADD COLUMN IF NOT EXISTS check_in DATE;
 ALTER TABLE transactions ADD COLUMN IF NOT EXISTS check_out DATE;
 
--- Tambahkan kolom tier ke profiles jika belum ada (dibutuhkan oleh AuthContext, diskon member, dll)
+-- Tambahkan kolom yang hilang di tabel profiles (dibutuhkan oleh AuthContext, diskon member, poin, dll)
 ALTER TABLE profiles ADD COLUMN IF NOT EXISTS tier TEXT DEFAULT 'Bronze';
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS points INTEGER DEFAULT 0;
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS role TEXT DEFAULT 'member';
 
 -- 4. ROW LEVEL SECURITY POLICIES (perbaiki error "violates row-level security policy")
 ALTER TABLE transactions ENABLE ROW LEVEL SECURITY;
