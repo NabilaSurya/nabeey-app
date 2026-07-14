@@ -3,6 +3,7 @@ import FloatingWhatsApp from "../components/FloatingWhatsApp";
 import LandingNavbar from "../components/landing/LandingNavbar";
 import HeroSection from "../components/landing/HeroSection";
 import KatalogSection from "../components/landing/KatalogSection";
+import ReviewsSection from "./guest/ReviewsSection";
 import KontakSection from "../components/landing/KontakSection";
 import FooterLanding from "../components/landing/FooterLanding";
 
@@ -17,6 +18,9 @@ export default function LandingPage() {
 
       {/* Katalog Kamar */}
       <KatalogSection />
+
+      {/* Testimonial & Review Customer */}
+      <ReviewsSection />
 
       {/* Tentang Kami */}
       <section

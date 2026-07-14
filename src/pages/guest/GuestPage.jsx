@@ -2,6 +2,7 @@ import GuestNavbar from "../../components/guest/GuestNavbar";
 import DashboardSection from "./DashboardSection";
 import RoomsSection from "./RoomsSection";
 import CustomersSection from "./CustomersSection";
+import ReviewsSection from "./ReviewsSection";
 import AboutSection from "./AboutSection";
 import MemberSection from "./MemberSection";
 import SettingsSection from "./SettingsSection";
@@ -25,10 +26,13 @@ export default function GuestPage() {
       {/* 4. Riwayat Komplain Publik (Pusat Layanan) */}
       <AboutSection />
       
-      {/* 5. Ajakan Komunitas */}
+      {/* 5. Testimonial & Review Customer */}
+      <ReviewsSection />
+      
+      {/* 6. Ajakan Komunitas */}
       <MemberSection />
       
-      {/* 6. Settings Panel */}
+      {/* 7. Settings Panel */}
       <SettingsSection />
 
       {/* Floating WhatsApp Button */}

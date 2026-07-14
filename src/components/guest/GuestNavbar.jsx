@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { FiGrid, FiActivity, FiMapPin, FiUsers, FiChevronRight, FiMenu, FiX, FiLogOut, FiUser } from "react-icons/fi";
+import { FiGrid, FiActivity, FiMapPin, FiStar, FiUsers, FiChevronRight, FiMenu, FiX, FiLogOut, FiUser } from "react-icons/fi";
 import { useLocation, useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext"; 
 
@@ -80,6 +80,9 @@ export default function GuestNavbar() {
           <a href="#destinations" onClick={(e) => handleScrollToSection(e, "destinations")} className="flex items-center gap-1.5 hover:text-[#5B5FEF] transition-colors">
             <FiMapPin size={16} /> About
           </a>
+          <a href="#reviews" onClick={(e) => handleScrollToSection(e, "reviews")} className="flex items-center gap-1.5 hover:text-[#5B5FEF] transition-colors">
+            <FiStar size={16} /> Reviews
+          </a>
 
           {isMember ? (
             <>
@@ -111,6 +114,7 @@ export default function GuestNavbar() {
           <a href="#dashboard" onClick={(e) => handleScrollToSection(e, "dashboard")} className="flex items-center gap-3 py-2 border-b border-slate-50"><FiGrid size={18} /> Home</a>
           <a href="#rooms" onClick={(e) => handleScrollToSection(e, "rooms")} className="flex items-center gap-3 py-2 border-b border-slate-50"><FiActivity size={18} /> Rooms</a>
           <a href="#destinations" onClick={(e) => handleScrollToSection(e, "destinations")} className="flex items-center gap-3 py-2 border-b border-slate-50"><FiMapPin size={18} /> About</a>
+          <a href="#reviews" onClick={(e) => handleScrollToSection(e, "reviews")} className="flex items-center gap-3 py-2 border-b border-slate-50"><FiStar size={18} /> Reviews</a>
           {isMember ? (
             <>
               <Link to="/MemberLanding" onClick={() => setIsOpen(false)} className="flex items-center gap-3 py-2 border-b border-slate-50 text-[#5B5FEF]"><FiUser size={18} /> Member</Link>
