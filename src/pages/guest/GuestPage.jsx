@@ -5,6 +5,8 @@ import CustomersSection from "./CustomersSection";
 import AboutSection from "./AboutSection";
 import MemberSection from "./MemberSection";
 import SettingsSection from "./SettingsSection";
+import FloatingWhatsApp from "../../components/FloatingWhatsApp";
+
 export default function GuestPage() {
   return (
     <div className="w-full min-h-screen bg-white text-slate-800 antialiased selection:bg-[#5B5FEF]/20 selection:text-[#5B5FEF] scroll-smooth">
@@ -28,6 +30,9 @@ export default function GuestPage() {
       
       {/* 6. Settings Panel */}
       <SettingsSection />
+
+      {/* Floating WhatsApp Button */}
+      <FloatingWhatsApp />
     </div>
   );
 }

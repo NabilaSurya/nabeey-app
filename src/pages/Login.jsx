@@ -31,37 +31,28 @@ export default function Login() {
       return;
     }
 
-    // DEBUG: cek data lengkap profile dari database
+    // Query role dari tabel profiles
     let userRole = "member";
-    let debugProfileInfo = "Profile tidak ditemukan";
     try {
-      const { data: profile, error: profileError } = await supabase
+      const { data: profile } = await supabase
         .from("profiles")
-        .select("*")
+        .select("role")
         .eq("id", data.user.id)
         .maybeSingle();
 
-      if (profileError) {
-        debugProfileInfo = "Error: " + profileError.message;
-        console.warn("[Login] Profile query error:", profileError);
-      } else if (profile) {
-        debugProfileInfo = JSON.stringify(profile);
-        if (profile.role) {
-          userRole = profile.role;
-        }
+      if (profile?.role) {
+        userRole = profile.role;
       }
     } catch (e) {
-      debugProfileInfo = "Exception: " + e.message;
       console.warn("[Login] Gagal query role:", e);
     }
 
-    // Simpan role ke localStorage — AuthContext.fetchProfile akan pakai ini sbg fallback
+    // Simpan ke localStorage untuk fallback AuthContext.fetchProfile
     localStorage.setItem("userRole", userRole);
 
-    alert(`[DEBUG] Role: ${userRole}\nProfile: ${debugProfileInfo}`);
+    alert("Login Berhasil!");
 
-    // Full page reload — paksa AuthProvider inisialisasi ulang dengan session yg valid
-    // AuthContext.initSession akan baca session dari localStorage, lalu fetchProfile
+    // Full page reload — paksa AuthProvider inisialisasi ulang dengan session valid
     const targetPath = userRole === "admin" ? "/admin" : userRole === "member" ? "/MemberLanding" : "/";
     window.location.href = targetPath;
   };

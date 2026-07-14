@@ -1,4 +1,5 @@
 import { FiCheck } from "react-icons/fi";
+import FloatingWhatsApp from "../components/FloatingWhatsApp";
 import LandingNavbar from "../components/landing/LandingNavbar";
 import HeroSection from "../components/landing/HeroSection";
 import KatalogSection from "../components/landing/KatalogSection";
@@ -90,6 +91,9 @@ export default function LandingPage() {
 
       {/* Footer */}
       <FooterLanding />
+
+      {/* Floating WhatsApp Button */}
+      <FloatingWhatsApp />
     </div>
   );
 }
