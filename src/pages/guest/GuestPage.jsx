@@ -5,11 +5,8 @@ import CustomersSection from "./CustomersSection";
 import AboutSection from "./AboutSection";
 import MemberSection from "./MemberSection";
 import SettingsSection from "./SettingsSection";
-import { AuthProvider } from "../../context/AuthContext";
-
 export default function GuestPage() {
   return (
-    <AuthProvider>
     <div className="w-full min-h-screen bg-white text-slate-800 antialiased selection:bg-[#5B5FEF]/20 selection:text-[#5B5FEF] scroll-smooth">
       {/* Navbar di paling atas */}
       <GuestNavbar />
@@ -32,6 +29,5 @@ export default function GuestPage() {
       {/* 6. Settings Panel */}
       <SettingsSection />
     </div>
-    </AuthProvider>
   );
 }

@@ -1,5 +1,4 @@
 import { FiCheck } from "react-icons/fi";
-import { AuthProvider } from "../context/AuthContext";
 import LandingNavbar from "../components/landing/LandingNavbar";
 import HeroSection from "../components/landing/HeroSection";
 import KatalogSection from "../components/landing/KatalogSection";
@@ -7,14 +6,6 @@ import KontakSection from "../components/landing/KontakSection";
 import FooterLanding from "../components/landing/FooterLanding";
 
 export default function LandingPage() {
-  return (
-    <AuthProvider>
-      <LandingPageContent />
-    </AuthProvider>
-  );
-}
-
-function LandingPageContent() {
   return (
     <div className="w-full min-h-screen bg-white antialiased selection:bg-[#5B5FEF]/20 selection:text-[#5B5FEF] scroll-smooth">
       {/* Navbar */}

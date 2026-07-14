@@ -1,25 +1,17 @@
 import { useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { 
   FiGrid, FiActivity, FiMapPin, FiUsers, FiMessageSquare, 
   FiChevronRight, FiMenu, FiX, FiCheckCircle, FiUser, FiMail, 
   FiGift, FiCreditCard, FiAward, FiLogOut, FiHome, FiSliders, FiPhone,
   FiSearch, FiFilter, FiInfo, FiStar, FiArrowLeft
 } from "react-icons/fi";
-import { AuthProvider, useAuth } from "../../context/AuthContext";
+import { useAuth } from "../../context/AuthContext";
 import { supabase } from "../../lib/supabase";
 
-export default function Member() {
-  return (
-    <AuthProvider>
-      <MemberContent />
-    </AuthProvider>
-  );
-}
-
-function MemberContent() {
+export default function MemberLandingPage() {
   const navigate = useNavigate();
-  const { user, isGuest, isMember, signOut } = useAuth();
+  const { user, loading, isGuest, isMember, signOut } = useAuth();
 
   // Navbar States
   const [isOpen, setIsOpen] = useState(false);
@@ -89,6 +81,13 @@ function MemberContent() {
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
+
+  // Redirect ke login jika guest dan loading selesai
+  useEffect(() => {
+    if (!loading && isGuest) {
+      navigate("/auth/login");
+    }
+  }, [loading, isGuest, navigate]);
 
   // Helper trigger custom toast
   const showNotification = (message, type = "success") => {
@@ -284,84 +283,19 @@ function MemberContent() {
       {/* ==================================================================
         2. MAIN CONTENT AREA 
         ================================================================== */}
-      <div className={`${isMember ? "pt-32" : "pt-12"} pb-24 max-w-7xl mx-auto px-6 md:px-8 w-full`}>
-        
-        {/* KONDISI 1: GUEST — Lihat halaman harga member */}
-        {isGuest && (
-          <div className="min-h-[85vh] flex items-center justify-center py-12">
-            <div className="w-full max-w-3xl">
-              <div className="text-center mb-12">
-                <span className="inline-block text-[#5B5FEF] text-xs font-bold uppercase tracking-widest bg-[#5B5FEF]/10 px-4 py-1.5 rounded-full mb-4">
-                  Membership Premium
-                </span>
-                <h1 className="text-4xl md:text-5xl font-black text-slate-900 tracking-tight mt-4">
-                  Jadi Member LuxStay
-                </h1>
-                <p className="text-sm text-slate-500 mt-3 max-w-xl mx-auto">
-                  Dapatkan akses eksklusif ke diskon kamar spesial, penukaran poin reward, dan layanan prioritas.
-                </p>
-              </div>
-
-              <div className="grid md:grid-cols-3 gap-6 mb-12">
-                {[
-                  {
-                    icon: <FiStar className="text-amber-500" size={28} />,
-                    title: "Diskon Eksklusif",
-                    desc: "Nikmati potongan harga hingga 20% untuk setiap pemesanan kamar.",
-                  },
-                  {
-                    icon: <FiGift className="text-[#5B5FEF]" size={28} />,
-                    title: "Poin Reward",
-                    desc: "Kumpulkan poin dari setiap transaksi dan tukarkan dengan hadiah menarik.",
-                  },
-                  {
-                    icon: <FiAward className="text-emerald-500" size={28} />,
-                    title: "Layanan Prioritas",
-                    desc: "Check-in ekspres, butler service, dan akses ke executive lounge.",
-                  },
-                ].map((item, i) => (
-                  <div key={i} className="bg-white rounded-2xl border border-slate-200 p-6 text-center hover:shadow-lg transition-shadow">
-                    <div className="w-14 h-14 bg-slate-50 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                      {item.icon}
-                    </div>
-                    <h3 className="text-sm font-black text-slate-900 mb-2">{item.title}</h3>
-                    <p className="text-xs text-slate-500 leading-relaxed">{item.desc}</p>
-                  </div>
-                ))}
-              </div>
-
-              <div className="bg-white border-2 border-[#5B5FEF] rounded-3xl p-8 md:p-10 max-w-lg mx-auto text-center shadow-xl">
-                <span className="bg-[#5B5FEF]/10 text-[#5B5FEF] text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-widest">
-                  GRATIS DAFTAR
-                </span>
-                <h3 className="text-xl font-black text-slate-900 mt-4">Daftar Sekarang</h3>
-                <p className="text-xs text-slate-500 mt-2">Buat akun LuxStay dan nikmati semua keuntungan member secara instan.</p>
-                <div className="flex justify-center gap-2 mt-2 mb-6">
-                  {["No hidden fees", "Instant access", "Cancel anytime"].map((tag) => (
-                    <span key={tag} className="text-[10px] bg-emerald-50 text-emerald-700 font-bold px-2 py-1 rounded-full">
-                      {tag}
-                    </span>
-                  ))}
-                </div>
-                <Link
-                  to="/auth/register"
-                  className="inline-flex items-center gap-2 bg-[#5B5FEF] hover:bg-[#4834D4] text-white font-bold text-sm py-4 px-10 rounded-xl transition-all shadow-lg transform hover:-translate-y-0.5"
-                >
-                  <FiUser size={16} /> Daftar Member Sekarang
-                </Link>
-                <p className="text-xs text-slate-400 mt-4">
-                  Sudah punya akun?{' '}
-                  <Link to="/auth/login" className="text-[#5B5FEF] font-bold hover:underline">
-                    Masuk
-                  </Link>
-                </p>
-              </div>
-            </div>
+      
+      {/* Loading: tampilkan spinner selagi auth masih diproses */}
+      {loading ? (
+        <div className="min-h-[60vh] flex items-center justify-center">
+          <div className="flex flex-col items-center gap-4">
+            <div className="w-12 h-12 border-4 border-indigo-200 border-t-[#5B5FEF] rounded-full animate-spin" />
+            <p className="text-xs font-bold text-slate-400">Memuat dashboard member...</p>
           </div>
-        )}
-
-        {/* KONDISI 2: MEMBER — Dashboard */}
-        {isMember && (
+        </div>
+      ) : isMember ? (
+        <div className="pt-32 pb-24 max-w-7xl mx-auto px-6 md:px-8 w-full">
+          
+          {/* MEMBER — Dashboard Poin */}
           <div className="space-y-12">
             
             {/* VIEW A: HOME DASHBOARD */}
@@ -613,8 +547,8 @@ function MemberContent() {
             )}
 
           </div>
-        )}
-      </div>
+        </div>
+      ) : null}
 
     </div>
   );

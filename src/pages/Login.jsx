@@ -1,10 +1,9 @@
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { useState, useEffect, useRef } from "react";
 import { FiMail, FiLock, FiArrowRight } from "react-icons/fi";
 import { supabase } from "../lib/supabase";
 
 export default function Login() {
-  const navigate = useNavigate();
 
   // useState
   const [email, setEmail] = useState("");
@@ -32,33 +31,39 @@ export default function Login() {
       return;
     }
 
-    localStorage.setItem(
-      "token",
-      data.session.access_token
-    );
-    localStorage.setItem(
-      "user",
-      JSON.stringify(data.user)
-    );
+    // DEBUG: cek data lengkap profile dari database
+    let userRole = "member";
+    let debugProfileInfo = "Profile tidak ditemukan";
+    try {
+      const { data: profile, error: profileError } = await supabase
+        .from("profiles")
+        .select("*")
+        .eq("id", data.user.id)
+        .maybeSingle();
 
-    // Fetch role dari tabel profiles untuk menentukan redirect
-    const { data: profile, error: profileError } = await supabase
-      .from("profiles")
-      .select("role")
-      .eq("id", data.user.id)
-      .maybeSingle();
-
-    const userRole = (!profileError && profile?.role) || "member";
-
-    alert("Login Berhasil!");
-
-    if (userRole === "admin") {
-      navigate("/admin");
-    } else if (userRole === "member") {
-      navigate("/MemberLanding");
-    } else {
-      navigate("/");
+      if (profileError) {
+        debugProfileInfo = "Error: " + profileError.message;
+        console.warn("[Login] Profile query error:", profileError);
+      } else if (profile) {
+        debugProfileInfo = JSON.stringify(profile);
+        if (profile.role) {
+          userRole = profile.role;
+        }
+      }
+    } catch (e) {
+      debugProfileInfo = "Exception: " + e.message;
+      console.warn("[Login] Gagal query role:", e);
     }
+
+    // Simpan role ke localStorage — AuthContext.fetchProfile akan pakai ini sbg fallback
+    localStorage.setItem("userRole", userRole);
+
+    alert(`[DEBUG] Role: ${userRole}\nProfile: ${debugProfileInfo}`);
+
+    // Full page reload — paksa AuthProvider inisialisasi ulang dengan session yg valid
+    // AuthContext.initSession akan baca session dari localStorage, lalu fetchProfile
+    const targetPath = userRole === "admin" ? "/admin" : userRole === "member" ? "/MemberLanding" : "/";
+    window.location.href = targetPath;
   };
 
   return (

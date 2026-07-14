@@ -96,7 +96,7 @@ export default function KonfirmasiBelanja() {
     setFilteredTransactions(result);
   }, [searchQuery, statusFilter, transactions]);
 
-  const handleApprove = async (transactionId, userId, pointsToAdd) => {
+  const handleApprove = async (transactionId, userId) => {
     setProcessingId(transactionId);
     try {
       // 1. Update status transaksi menjadi Approved
@@ -107,33 +107,40 @@ export default function KonfirmasiBelanja() {
 
       if (txError) throw txError;
 
-      // 2. Jika ini booking member (punya userId), tambahkan poin
+      // 2. Jika ini booking member, coba tambahkan poin (opsional — jangan blokir jika gagal)
+      let pointsError = null;
       if (userId) {
-        const { data: profile, error: profileError } = await supabase
-          .from("profiles")
-          .select("points")
-          .eq("id", userId)
-          .single();
+        try {
+          const { data: profile } = await supabase
+            .from("profiles")
+            .select("points")
+            .eq("id", userId)
+            .single();
 
-        if (profileError) throw profileError;
-
-        const FIXED_POINTS = 100;
-        const totalPoints = (profile.points || 0) + FIXED_POINTS;
-
-        const { error: updateError } = await supabase
-          .from("profiles")
-          .update({ points: totalPoints })
-          .eq("id", userId);
-
-        if (updateError) throw updateError;
-
-        alert(`✅ Booking disetujui! Poin member berhasil ditambahkan.`);
-      } else {
-        // Guest booking — tanpa poin
-        alert(`✅ Booking guest berhasil disetujui.`);
+          if (profile) {
+            await supabase
+              .from("profiles")
+              .update({ points: (profile.points || 0) + 100 })
+              .eq("id", userId);
+          }
+        } catch (innerErr) {
+          pointsError = innerErr.message;
+          console.warn("[Poin] Gagal update points:", innerErr.message);
+        }
       }
 
-      // 3. Refresh data
+      // Tampilkan notifikasi sesuai hasil
+      if (pointsError) {
+        alert(
+          `✅ Booking disetujui! Tapi poin belum tersimpan.\n\n` +
+          `Jalankan SQL ini di Supabase SQL Editor agar poin bisa berfungsi:\n\n` +
+          `ALTER TABLE profiles ADD COLUMN points INTEGER DEFAULT 0;`
+        );
+      } else {
+        alert("✅ Booking berhasil disetujui!");
+      }
+
+      // 3. Refresh data — selalu dijalankan
       await fetchTransactions();
     } catch (err) {
       console.error("[KonfirmasiBelanja] Gagal approve transaksi:", err);

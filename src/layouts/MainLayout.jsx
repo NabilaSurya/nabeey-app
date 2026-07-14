@@ -3,17 +3,29 @@ import { Outlet, useNavigate } from "react-router-dom";
 import Sidebar from "../components/Sidebar";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
+import { useAuth } from "../context/AuthContext";
+import LoadingSpinner from "../components/LoadingSpinner";
 
 export default function MainLayout() {
   const navigate = useNavigate();
+  const { loading, isGuest, isMember } = useAuth();
 
   useEffect(() => {
-    const token = localStorage.getItem("token");
-    
-    if (!token) {
+    if (loading) return;
+
+    if (isGuest) {
       navigate("/auth/login");
+    } else if (isMember) {
+      // Member tidak punya akses ke halaman admin — arahkan ke dashboard member
+      navigate("/MemberLanding");
     }
-  }, [navigate]);
+  }, [navigate, loading, isGuest, isMember]);
+
+  // Selagi auth masih loading, tampilkan spinner
+  if (loading) return <LoadingSpinner />;
+
+  // Jangan render konten admin jika bukan admin (redirect akan terjadi) 
+  if (isGuest || isMember) return null;
 
   return (
     <div className="bg-[#FAFBFF] min-h-screen flex font-sans overflow-hidden">

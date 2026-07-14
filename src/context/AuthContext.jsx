@@ -33,32 +33,59 @@ export function AuthProvider({ children }) {
         .from("profiles")
         .select("*")
         .eq("id", userId)
-        .single();
+        .maybeSingle();
+
+      // Helper: fallback ke session user (dipakai jika profile tdk ditemukan atau error)
+      const fallbackToSession = async () => {
+        const { data: { user: sessionUser } } = await supabase.auth.getUser();
+        const storedRole = localStorage.getItem("userRole") || "member";
+        if (sessionUser) {
+          setUser({
+            isLoggedIn: true,
+            role: storedRole,
+            id: sessionUser.id,
+            name: sessionUser.user_metadata?.full_name || "Member",
+            email: sessionUser.email,
+            tier: "Bronze",
+            points: 0,
+          });
+        }
+        setLoading(false);
+      };
 
       if (error) {
-        // Retry jika trigger database belum selesai (race condition)
+        // Error query beneran (bukan "no rows found") — retry dulu
         if (retries > 0) {
           await new Promise((r) => setTimeout(r, 1000));
           return fetchProfile(userId, retries - 1);
         }
-
-        // Gagal fetch profil — tetap sebagai GUEST, jangan auto-login
-        console.warn("Fetch profile gagal, tetap sebagai guest:", error.message);
+        // Retry habis — fallback
+        console.warn("Fetch profile gagal, fallback ke session:", error.message);
+        await fallbackToSession();
         return;
       }
 
+      if (!data) {
+        // Profile tdk ada di database — fallback tanpa retry
+        console.warn("Profile tidak ditemukan di DB, fallback ke session");
+        await fallbackToSession();
+        return;
+      }
+
+      // Profile ditemukan!
       setUser({
         isLoggedIn: true,
-        role: data.role,
+        role: data.role || localStorage.getItem("userRole") || "member",
         id: data.id,
         name: data.full_name,
-        email: null, // email dikelola oleh auth, bukan tabel profiles
-        tier: data.tier,
-        points: data.points,
+        email: null,
+        tier: data.tier || "Bronze",
+        points: data.points ?? 0,
       });
+      setLoading(false);
     } catch (err) {
-      // Gagal fetch profil — tetap sebagai GUEST, jangan auto-login
-      console.warn("Fetch profile exception, tetap sebagai guest:", err);
+      console.warn("Fetch profile exception, fallback ke session:", err);
+      await fallbackToSession();
     }
   }, []);
 
@@ -94,12 +121,14 @@ export function AuthProvider({ children }) {
       (_event, currentSession) => {
         if (!isMounted) return;
         setSession(currentSession);
+        setLoading(true); // Aktifkan loading selagi fetch profil
 
         if (currentSession?.user) {
           // setTimeout hindari deadlock di Supabase JS client
           setTimeout(() => fetchProfile(currentSession.user.id), 0);
         } else {
           setUser(GUEST_STATE);
+          setLoading(false);
         }
       }
     );
